@@ -1,17 +1,21 @@
-// project-specific definitions
-//#define CFG_eu868 1
-// #define CFG_us915 1
-//#define CFG_au915 1
-//#define CFG_as923 1
-// #define LMIC_COUNTRY_CODE LMIC_COUNTRY_CODE_JP      /* for as923-JP; also define CFG_as923 */
-//#define CFG_kr920 1
-#define CFG_in866 1 
-// #define CFG_sx1276_radio 1
-// #define CFG_sx1261_radio 1
+// project-specific definitions for LMIC library
+#pragma once
+
+// Select the India region
+#define CFG_in866 1
+
+// Select the radio type for Heltec LoRa32 v3 (SX1262)
 #define CFG_sx1262_radio 1
-#define ARDUINO_heltec_wifi_lora_32_V3
-//#define LMIC_USE_INTERRUPTS1
-// Heltec LoRa32 V3.2 Configuration
-#define CFG_us915 1  // or CFG_eu868 for Europe
-#define CFG_sx1262 1
-#define LMIC_USE_INTERRUPTS
+
+// Board definition
+#define ARDUINO_heltec_wifi_lora_32_V3 1
+
+// Disable features we don't need
+#define DISABLE_PING 1
+#define DISABLE_BEACONS 1
+
+// Enable interrupts for better performance
+#define LMIC_USE_INTERRUPTS 1
+
+// Don't define any other CFG_* region flags
+// Only CFG_in866 should be defined
