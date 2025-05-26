@@ -95,8 +95,8 @@ int16_t LM_SX1276::setBandwidth(float bw) {
     return module->setBandwidth(bw);
 }
 
-int16_t LM_SX1276::setSpreadingFactor(uint8_t sf) {
-    return module->setSpreadingFactor(sf);
+int16_t LM_SX1276::setSpreadingFactor(uint8_t sf=8) {
+    return module->setSpreadingFactor(8);
 }
 
 int16_t LM_SX1276::setCodingRate(uint8_t cr) {

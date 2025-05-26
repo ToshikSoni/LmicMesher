@@ -59,7 +59,7 @@
 #define RADIOLIB_LORAWAN_DATA_RATE_SF_10                        (0x03 << 3) //  5     3                            SF10
 #define RADIOLIB_LORAWAN_DATA_RATE_SF_9                         (0x02 << 3) //  5     3                            SF9
 #define RADIOLIB_LORAWAN_DATA_RATE_SF_8                         (0x01 << 3) //  5     3                            SF8
-#define RADIOLIB_LORAWAN_DATA_RATE_SF_7                         (0x00 << 3) //  5     3                            SF7
+#define RADIOLIB_LORAWAN_DATA_RATE_SF_7                         (0x00 << 3) //  5     3                            SF8
 #define RADIOLIB_LORAWAN_DATA_RATE_BW                           (0x03 << 1) //  2     1     bandwidth mask
 #define RADIOLIB_LORAWAN_DATA_RATE_BW_125_KHZ                   (0x00 << 1) //  2     1                        125 kHz
 #define RADIOLIB_LORAWAN_DATA_RATE_BW_250_KHZ                   (0x01 << 1) //  2     1                        250 kHz

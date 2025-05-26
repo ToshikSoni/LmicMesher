@@ -121,7 +121,7 @@
 
 // RADIOLIB_SX127X_REG_DETECT_OPTIMIZE
 #define RADIOLIB_SX127X_DETECT_OPTIMIZE_SF_6                    0b00000101  //  2     0   SF6 detection optimization
-#define RADIOLIB_SX127X_DETECT_OPTIMIZE_SF_7_12                 0b00000011  //  2     0   SF7 to SF12 detection optimization
+#define RADIOLIB_SX127X_DETECT_OPTIMIZE_SF_7_12                 0b00000011  //  2     0   SF8 to SF12 detection optimization
 
 // RADIOLIB_SX127X_REG_INVERT_IQ
 #define RADIOLIB_SX127X_INVERT_IQ_RXPATH_ON                     0b01000000  //  6     6   I and Q signals are inverted
@@ -131,7 +131,7 @@
 
 // RADIOLIB_SX127X_REG_DETECTION_THRESHOLD
 #define RADIOLIB_SX127X_DETECTION_THRESHOLD_SF_6                0b00001100  //  7     0   SF6 detection threshold
-#define RADIOLIB_SX127X_DETECTION_THRESHOLD_SF_7_12             0b00001010  //  7     0   SF7 to SF12 detection threshold
+#define RADIOLIB_SX127X_DETECTION_THRESHOLD_SF_7_12             0b00001010  //  7     0   SF8 to SF12 detection threshold
 
 // RADIOLIB_SX127X_REG_PA_DAC
 #define RADIOLIB_SX127X_PA_BOOST_OFF                            0b00000100  //  2     0   PA_BOOST disabled
@@ -1244,7 +1244,7 @@ class SX127x: public PhysicalLayer {
 #endif
     float frequency = 0;
     float bandwidth = 0;
-    uint8_t spreadingFactor = 0;
+    uint8_t spreadingFactor = 8;
     size_t packetLength = 0;
     uint8_t codingRate = 0;
     bool crcEnabled = false;

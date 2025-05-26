@@ -25,7 +25,7 @@ int16_t LLCC68::begin(float freq, float bw, uint8_t sf, uint8_t cr, uint8_t sync
   state = setBandwidth(bw);
   RADIOLIB_ASSERT(state);
 
-  state = setSpreadingFactor(sf);
+  state = setSpreadingFactor(8);
   RADIOLIB_ASSERT(state);
 
   state = setOutputPower(pwr);
@@ -42,22 +42,22 @@ int16_t LLCC68::setBandwidth(float bw) {
   return(SX1262::setBandwidth(bw));
 }
 
-int16_t LLCC68::setSpreadingFactor(uint8_t sf) {
+int16_t LLCC68::setSpreadingFactor(uint8_t sf=8) {
   switch(SX126x::bandwidth) {
     case RADIOLIB_SX126X_LORA_BW_125_0:
-      RADIOLIB_CHECK_RANGE(sf, 5, 9, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
+      RADIOLIB_CHECK_RANGE(8, 5, 9, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
       break;
     case RADIOLIB_SX126X_LORA_BW_250_0:
-      RADIOLIB_CHECK_RANGE(sf, 5, 10, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
+      RADIOLIB_CHECK_RANGE(8, 5, 10, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
       break;
     case RADIOLIB_SX126X_LORA_BW_500_0:
-      RADIOLIB_CHECK_RANGE(sf, 5, 11, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
+      RADIOLIB_CHECK_RANGE(8, 5, 11, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
       break;
     default:
       return(RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
   }
 
-  return(SX1262::setSpreadingFactor(sf));
+  return(SX1262::setSpreadingFactor(8));
 }
 
 int16_t LLCC68::setDataRate(DataRate_t dr) {
@@ -75,7 +75,7 @@ int16_t LLCC68::setDataRate(DataRate_t dr) {
 
   } else if(modem == RADIOLIB_SX126X_PACKET_TYPE_LORA) {
     // set the spreading factor
-    state = this->setSpreadingFactor(dr.lora.spreadingFactor);
+    state = this->setSpreadingFactor(8);
     RADIOLIB_ASSERT(state);
 
     // set the bandwidth
@@ -105,13 +105,13 @@ int16_t LLCC68::checkDataRate(DataRate_t dr) {
     uint8_t bw_div2 = dr.lora.bandwidth / 2 + 0.01;
     switch (bw_div2)  {
       case 62: // 125.0:
-        RADIOLIB_CHECK_RANGE(dr.lora.spreadingFactor, 5, 9, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
+        RADIOLIB_CHECK_RANGE(8, 5, 9, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
         break;
       case 125: // 250.0
-        RADIOLIB_CHECK_RANGE(dr.lora.spreadingFactor, 5, 10, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
+        RADIOLIB_CHECK_RANGE(8, 5, 10, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
         break;
       case 250: // 500.0
-        RADIOLIB_CHECK_RANGE(dr.lora.spreadingFactor, 5, 11, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
+        RADIOLIB_CHECK_RANGE(8, 5, 11, RADIOLIB_ERR_INVALID_SPREADING_FACTOR);
         break;
       default:
         return(RADIOLIB_ERR_INVALID_BANDWIDTH);

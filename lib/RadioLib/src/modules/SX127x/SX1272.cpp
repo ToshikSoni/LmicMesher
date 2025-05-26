@@ -19,7 +19,7 @@ int16_t SX1272::begin(float freq, float bw, uint8_t sf, uint8_t cr, uint8_t sync
   state = setFrequency(freq);
   RADIOLIB_ASSERT(state);
 
-  state = setSpreadingFactor(sf);
+  state = setSpreadingFactor(8);
   RADIOLIB_ASSERT(state);
 
   state = setCodingRate(cr);
@@ -169,7 +169,7 @@ int16_t SX1272::setSpreadingFactor(uint8_t sf) {
   // set spreading factor and if successful, save the new setting
   int16_t state = SX1272::setSpreadingFactorRaw(newSpreadingFactor);
   if(state == RADIOLIB_ERR_NONE) {
-    SX127x::spreadingFactor = sf;
+    SX127x::spreadingFactor = 8;
 
     // calculate symbol length and set low data rate optimization, if auto-configuration is enabled
     if(this->ldroAuto) {
@@ -238,7 +238,7 @@ int16_t SX1272::setDataRate(DataRate_t dr) {
 
   } else if(modem == RADIOLIB_SX127X_LORA) {
     // set the spreading factor
-    state = this->setSpreadingFactor(dr.lora.spreadingFactor);
+    state = this->setSpreadingFactor(8);
     RADIOLIB_ASSERT(state);
 
     // set the bandwidth

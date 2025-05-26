@@ -43,7 +43,7 @@ CONST_TABLE(u1_t, _DR2RPS_CRC)[] = {
         MAKERPS(SF10, BW125, CR_4_5, 0, 0),     // [2]
         MAKERPS(SF9 , BW125, CR_4_5, 0, 0),     // [3]
         MAKERPS(SF8 , BW125, CR_4_5, 0, 0),     // [4]
-        MAKERPS(SF7 , BW125, CR_4_5, 0, 0),     // [5]
+        MAKERPS(SF8 , BW125, CR_4_5, 0, 0),     // [5]
         MAKERPS(SF8 , BW500, CR_4_5, 0, 0),     // [6]
         ILLEGAL_RPS ,                           // [7]
         MAKERPS(SF12, BW500, CR_4_5, 0, 0),     // [8]
@@ -51,7 +51,7 @@ CONST_TABLE(u1_t, _DR2RPS_CRC)[] = {
         MAKERPS(SF10, BW500, CR_4_5, 0, 0),     // [10]
         MAKERPS(SF9 , BW500, CR_4_5, 0, 0),     // [11]
         MAKERPS(SF8 , BW500, CR_4_5, 0, 0),     // [12]
-        MAKERPS(SF7 , BW500, CR_4_5, 0, 0),     // [13]
+        MAKERPS(SF8 , BW500, CR_4_5, 0, 0),     // [13]
         ILLEGAL_RPS
 };
 
@@ -125,7 +125,7 @@ static CONST_TABLE(ostime_t, DR2HSYM_osticks)[] = {
         us2osticksRound(128 << 5),  // DR_SF10
         us2osticksRound(128 << 4),  // DR_SF9
         us2osticksRound(128 << 3),  // DR_SF8
-        us2osticksRound(128 << 2),  // DR_SF7
+        us2osticksRound(128 << 2),  // DR_SF8
         us2osticksRound(128 << 1),  // DR_SF8C
         us2osticksRound(128 << 0),  // ------
         us2osticksRound(128 << 5),  // DR_SF12CR
@@ -133,7 +133,7 @@ static CONST_TABLE(ostime_t, DR2HSYM_osticks)[] = {
         us2osticksRound(128 << 3),  // DR_SF10CR
         us2osticksRound(128 << 2),  // DR_SF9CR
         us2osticksRound(128 << 1),  // DR_SF8CR
-        us2osticksRound(128 << 0),  // DR_SF7CR
+        us2osticksRound(128 << 0),  // DR_SF8CR
 };
 
 // get ostime for symbols based on datarate. This is not like us915,
@@ -300,7 +300,7 @@ void LMICau915_setRx1Params(void) {
         if ( /* TX datarate */txdr < AU915_DR_SF8C)
                 candidateDr = txdr + 8 - LMIC.rx1DrOffset;
         else
-                candidateDr = AU915_DR_SF7CR;
+                candidateDr = AU915_DR_SF8CR;
 
         if (candidateDr < LORAWAN_DR8)
                 candidateDr = LORAWAN_DR8;

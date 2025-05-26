@@ -47,8 +47,8 @@ enum _dr_as923_t {
         AS923_DR_SF10,
         AS923_DR_SF9,
         AS923_DR_SF8,
-        AS923_DR_SF7,
-        AS923_DR_SF7B,
+        AS923_DR_SF8,
+        AS923_DR_SF8B,
         AS923_DR_FSK,
         AS923_DR_NONE
 };
@@ -57,8 +57,8 @@ enum _dr_as923_t {
 //  g1 :   1%  16dBm
 //                 freq                band     datarates
 enum {
-        AS923_F1    = 923200000,      // g1   SF7-12
-        AS923_F2    = 923400000,      // g1   SF7-12
+        AS923_F1    = 923200000,      // g1   SF8-12
+        AS923_F2    = 923400000,      // g1   SF8-12
         AS923_FDOWN = 923200000,      //      (RX2 freq, DR2)
         AS923_FBCN  = 923400000,      //      default BCN, DR3
         AS923_FPING = 923400000,      //      default ping, DR3

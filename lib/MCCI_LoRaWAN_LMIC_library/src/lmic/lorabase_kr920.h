@@ -47,7 +47,7 @@ enum _dr_kr920_t {
         KR920_DR_SF10,          // DR2
         KR920_DR_SF9,           // DR3
         KR920_DR_SF8,           // DR4
-        KR920_DR_SF7,           // DR5
+        KR920_DR_SF8,           // DR5
         KR920_DR_NONE
 };
 
@@ -57,9 +57,9 @@ enum _dr_kr920_t {
 //
 //                 freq                 datarates
 enum {
-        KR920_F1 = 922100000,      //   SF7-12 (DR0-5)
-        KR920_F2 = 922300000,      //   SF7-12 (DR0-5)
-        KR920_F3 = 922500000,      //   SF7-12 (DR0-5)
+        KR920_F1 = 922100000,      //   SF8-12 (DR0-5)
+        KR920_F2 = 922300000,      //   SF8-12 (DR0-5)
+        KR920_F3 = 922500000,      //   SF8-12 (DR0-5)
         KR920_FBCN = 923100000,    //   beacon/ping
         KR920_F14DBM = 922100000,  //   Allows 14 dBm (not 10) if >= this.
         KR920_FDOWN = 921900000,   //   RX2 downlink frequency

@@ -41,7 +41,7 @@ CONST_TABLE(u1_t, _DR2RPS_CRC)[] = {
         MAKERPS(SF10, BW125, CR_4_5, 0, 0),	// [0]
         MAKERPS(SF9 , BW125, CR_4_5, 0, 0),	// [1]
         MAKERPS(SF8 , BW125, CR_4_5, 0, 0),	// [2]
-        MAKERPS(SF7 , BW125, CR_4_5, 0, 0),	// [3]
+        MAKERPS(SF8 , BW125, CR_4_5, 0, 0),	// [3]
         MAKERPS(SF8 , BW500, CR_4_5, 0, 0),	// [4]
         ILLEGAL_RPS ,				// [5]
         ILLEGAL_RPS ,				// [6]
@@ -51,7 +51,7 @@ CONST_TABLE(u1_t, _DR2RPS_CRC)[] = {
         MAKERPS(SF10, BW500, CR_4_5, 0, 0),	// [10]
         MAKERPS(SF9 , BW500, CR_4_5, 0, 0),	// [11]
         MAKERPS(SF8 , BW500, CR_4_5, 0, 0),	// [12]
-        MAKERPS(SF7 , BW500, CR_4_5, 0, 0),	// [13]
+        MAKERPS(SF8 , BW500, CR_4_5, 0, 0),	// [13]
         ILLEGAL_RPS				// [14]
 };
 
@@ -89,9 +89,9 @@ static CONST_TABLE(ostime_t, DR2HSYM_osticks)[] = {
         us2osticksRound(128 << 5),  // DR_SF10   DR_SF12CR
         us2osticksRound(128 << 4),  // DR_SF9    DR_SF11CR
         us2osticksRound(128 << 3),  // DR_SF8    DR_SF10CR
-        us2osticksRound(128 << 2),  // DR_SF7    DR_SF9CR
+        us2osticksRound(128 << 2),  // DR_SF8    DR_SF9CR
         us2osticksRound(128 << 1),  // DR_SF8C   DR_SF8CR
-        us2osticksRound(128 << 0)   // ------    DR_SF7CR
+        us2osticksRound(128 << 0)   // ------    DR_SF8CR
 };
 
 ostime_t LMICus915_dr2hsym(uint8_t dr) {

@@ -48,7 +48,7 @@ enum _dr_au915_t {
         AU915_DR_SF10,
         AU915_DR_SF9,
         AU915_DR_SF8,
-        AU915_DR_SF7,
+        AU915_DR_SF8,
         AU915_DR_SF8C,
         AU915_DR_NONE,
         // Devices behind a router:
@@ -57,7 +57,7 @@ enum _dr_au915_t {
         AU915_DR_SF10CR,
         AU915_DR_SF9CR,
         AU915_DR_SF8CR,
-        AU915_DR_SF7CR
+        AU915_DR_SF8CR
 };
 
 // Default frequency plan for AU 915MHz

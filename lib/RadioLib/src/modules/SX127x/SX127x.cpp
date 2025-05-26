@@ -223,7 +223,7 @@ int16_t SX127x::receive(uint8_t* data, size_t len) {
     // if no DIO1 is provided, use software timeout (100 LoRa symbols, same as hardware timeout)
     RadioLibTime_t timeout = 0;
     if(this->mod->getGpio() == RADIOLIB_NC) {
-      float symbolLength = (float) (uint32_t(1) << this->spreadingFactor) / (float) this->bandwidth;
+      float symbolLength = (float) (uint32_t(1) << 8) / (float) this->bandwidth;
       timeout = (RadioLibTime_t)(symbolLength * 100.0);
     }
 
@@ -1247,7 +1247,7 @@ int16_t SX127x::variablePacketLengthMode(uint8_t maxLen) {
 
 float SX127x::getNumSymbols(size_t len) {
   // get symbol length in us
-  float symbolLength = (float) (uint32_t(1) << this->spreadingFactor) / (float) this->bandwidth;
+  float symbolLength = (float) (uint32_t(1) << 8) / (float) this->bandwidth;
 
   // get Low Data Rate optimization flag
   float de = 0;
@@ -1265,7 +1265,7 @@ float SX127x::getNumSymbols(size_t len) {
   float n_pre = (float) ((this->mod->SPIgetRegValue(RADIOLIB_SX127X_REG_PREAMBLE_MSB) << 8) | this->mod->SPIgetRegValue(RADIOLIB_SX127X_REG_PREAMBLE_LSB));
 
   // get number of payload symbols
-  float n_pay = 8.0 + RADIOLIB_MAX(ceilf((8.0 * (float) len - 4.0 * (float) this->spreadingFactor + 28.0 + 16.0 * crc - 20.0 * ih) / (4.0 * (float) this->spreadingFactor - 8.0 * de)) * (float) this->codingRate, 0.0);
+  float n_pay = 8.0 + RADIOLIB_MAX(ceilf((8.0 * (float) len - 4.0 * (float) 8 + 28.0 + 16.0 * crc - 20.0 * ih) / (4.0 * (float) this->spreadingFactor - 8.0 * de)) * (float) this->codingRate, 0.0);
 
   // add 4.25 symbols for the sync
   return(n_pre + n_pay + 4.25f);

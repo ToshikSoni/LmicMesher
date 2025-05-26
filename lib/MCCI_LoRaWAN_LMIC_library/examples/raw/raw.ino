@@ -200,9 +200,9 @@ void setup() {
 
   // Use a suitable spreading factor
   if (uBandwidth < 500)
-        LMIC.datarate = US915_DR_SF7;         // DR4
+        LMIC.datarate = US915_DR_SF8;         // DR4
   else
-        LMIC.datarate = US915_DR_SF12CR;      // DR8
+        LMIC.datarate = US915_DR_SF8;      // DR8
 
   // default tx power for US: 21 dBm
   LMIC.txpow = 21;
@@ -258,9 +258,9 @@ void setup() {
 
   // Use a suitable spreading factor
   if (uBandwidth < 500)
-        LMIC.datarate = AU915_DR_SF7;         // DR4
+        LMIC.datarate = AU915_DR_SF8;         // DR4
   else
-        LMIC.datarate = AU915_DR_SF12CR;      // DR8
+        LMIC.datarate = AU915_DR_SF8;      // DR8
 
   // default tx power for AU: 30 dBm
   LMIC.txpow = 30;
@@ -282,9 +282,9 @@ void setup() {
 
         // Use a suitable spreading factor
         if (uBandwidth == 125)
-                LMIC.datarate = AS923_DR_SF7;         // DR7
+                LMIC.datarate = AS923_DR_SF8;         // DR7
         else
-                LMIC.datarate = AS923_DR_SF7B;        // DR8
+                LMIC.datarate = AS923_DR_SF8;        // DR8
 
         // default tx power for AS: 21 dBm
         LMIC.txpow = 16;
@@ -310,7 +310,7 @@ void setup() {
         LMIC.freq = KR920_F1 + kChannel * 200000;
         uBandwidth = 125;
 
-        LMIC.datarate = KR920_DR_SF7;         // DR7
+        LMIC.datarate = KR920_DR_SF8;         // DR7
         // default tx power for KR: 14 dBm
         LMIC.txpow = KR920_TX_EIRP_MAX_DBM;
         if (LMIC.freq < KR920_F14DBM)
@@ -334,7 +334,7 @@ void setup() {
         LMIC.freq = IN866_F1 + kChannel * 200000;
         uBandwidth = 125;
 
-        LMIC.datarate = IN866_DR_SF7;         // DR7
+        LMIC.datarate = IN866_DR_SF8;         // DR7
         // default tx power for IN: 30 dBm
         LMIC.txpow = IN866_TX_EIRP_MAX_DBM;
 #else
@@ -345,7 +345,7 @@ void setup() {
   // disable RX IQ inversion
   LMIC.noRXIQinversion = true;
 
-  // This sets CR 4/5, BW125 (except for EU/AS923 DR_SF7B, which uses BW250)
+  // This sets CR 4/5, BW125 (except for EU/AS923 DR_SF8B, which uses BW250)
   LMIC.rps = updr2rps(LMIC.datarate);
 
   Serial.print("Frequency: "); Serial.print(LMIC.freq / 1000000);
@@ -354,7 +354,7 @@ void setup() {
   Serial.print("  LMIC.datarate: "); Serial.print(LMIC.datarate);
   Serial.print("  LMIC.txpow: "); Serial.println(LMIC.txpow);
 
-  // This sets CR 4/5, BW125 (except for DR_SF7B, which uses BW250)
+  // This sets CR 4/5, BW125 (except for DR_SF8B, which uses BW250)
   LMIC.rps = updr2rps(LMIC.datarate);
 
   // disable RX IQ inversion

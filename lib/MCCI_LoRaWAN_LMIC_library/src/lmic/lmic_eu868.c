@@ -43,8 +43,8 @@ CONST_TABLE(u1_t, _DR2RPS_CRC)[] = {
         (u1_t)MAKERPS(SF10, BW125, CR_4_5, 0, 0),
         (u1_t)MAKERPS(SF9,  BW125, CR_4_5, 0, 0),
         (u1_t)MAKERPS(SF8,  BW125, CR_4_5, 0, 0),
-        (u1_t)MAKERPS(SF7,  BW125, CR_4_5, 0, 0),
-        (u1_t)MAKERPS(SF7,  BW250, CR_4_5, 0, 0),
+        (u1_t)MAKERPS(SF8,  BW125, CR_4_5, 0, 0),
+        (u1_t)MAKERPS(SF8,  BW250, CR_4_5, 0, 0),
         (u1_t)MAKERPS(FSK,  BW125, CR_4_5, 0, 0),
         ILLEGAL_RPS
 };
@@ -88,8 +88,8 @@ static CONST_TABLE(ostime_t, DR2HSYM_osticks)[] = {
         us2osticksRound(128 << 5),  // DR_SF10
         us2osticksRound(128 << 4),  // DR_SF9
         us2osticksRound(128 << 3),  // DR_SF8
-        us2osticksRound(128 << 2),  // DR_SF7
-        us2osticksRound(128 << 1),  // DR_SF7B
+        us2osticksRound(128 << 2),  // DR_SF8
+        us2osticksRound(128 << 1),  // DR_SF8B
         us2osticksRound(80)         // FSK -- time for 1/2 byte (unused by LMIC)
 };
 
@@ -119,7 +119,7 @@ void LMICeu868_initDefaultChannels(bit_t join) {
         for (u1_t fu = 0; fu<NUM_DEFAULT_CHANNELS; fu++, su++) {
                 LMIC.channelFreq[fu] = TABLE_GET_U4(iniChannelFreq, su);
                 // TODO(tmm@mcci.com): don't use EU DR directly, use something from the LMIC context or a static const
-                LMIC.channelDrMap[fu] = DR_RANGE_MAP(EU868_DR_SF12, EU868_DR_SF7);
+                LMIC.channelDrMap[fu] = DR_RANGE_MAP(EU868_DR_SF12, EU868_DR_SF8);
         }
 
         (void) LMIC_setupBand(BAND_MILLI, 14 /* dBm */, 1000 /* 0.1% */);
@@ -197,7 +197,7 @@ bit_t LMIC_setupChannel(u1_t chidx, u4_t freq, u2_t drmap, s1_t band) {
         freq |= band;
 
         LMIC.channelFreq[chidx] = freq;
-        LMIC.channelDrMap[chidx] = drmap == 0 ? DR_RANGE_MAP(EU868_DR_SF12, EU868_DR_SF7) : drmap;
+        LMIC.channelDrMap[chidx] = drmap == 0 ? DR_RANGE_MAP(EU868_DR_SF12, EU868_DR_SF8) : drmap;
         if (fEnable)
                 LMIC.channelMap |= 1 << chidx;  // enabled right away
         else

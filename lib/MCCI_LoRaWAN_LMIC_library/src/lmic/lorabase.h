@@ -130,7 +130,7 @@ enum _dr_code_t {
 // per 2.1.3: not implemented
 #define LMIC_ENABLE_TxParamSetupReq	0
 
-enum { DR_DFLTMIN = EU868_DR_SF7 };   // DR5
+enum { DR_DFLTMIN = EU868_DR_SF8 };   // DR5
                                       // DR_PAGE is a debugging parameter
 enum { DR_PAGE = DR_PAGE_EU868 };
 
@@ -166,8 +166,8 @@ enum _dr_configured_t {
 	DR_SF10 = EU868_DR_SF10,
 	DR_SF9  = EU868_DR_SF9,
 	DR_SF8  = EU868_DR_SF8,
-	DR_SF7  = EU868_DR_SF7,
-	DR_SF7B = EU868_DR_SF7B,
+	DR_SF8  = EU868_DR_SF8,
+	DR_SF8B = EU868_DR_SF8B,
 	DR_FSK  = EU868_DR_FSK,
 	DR_NONE = EU868_DR_NONE
 };
@@ -180,7 +180,7 @@ enum _dr_configured_t {
 // per 2.2.3: not implemented
 #define LMIC_ENABLE_TxParamSetupReq	0
 
-enum { DR_DFLTMIN = US915_DR_SF7 };  // DR5
+enum { DR_DFLTMIN = US915_DR_SF8 };  // DR5
 
 // DR_PAGE is a debugging parameter; it must be defined but it has no use in arduino-lmic
 enum { DR_PAGE = DR_PAGE_US915 };
@@ -215,7 +215,7 @@ enum _dr_configured_t {
         DR_SF10   = US915_DR_SF10,
         DR_SF9    = US915_DR_SF9,
         DR_SF8    = US915_DR_SF8,
-        DR_SF7    = US915_DR_SF7,
+        DR_SF8    = US915_DR_SF8,
         DR_SF8C   = US915_DR_SF8C,
         DR_NONE   = US915_DR_NONE,
         DR_SF12CR = US915_DR_SF12CR,
@@ -223,7 +223,7 @@ enum _dr_configured_t {
         DR_SF10CR = US915_DR_SF10CR,
         DR_SF9CR  = US915_DR_SF9CR,
         DR_SF8CR  = US915_DR_SF8CR,
-        DR_SF7CR  = US915_DR_SF7CR
+        DR_SF8CR  = US915_DR_SF8CR
 };
 # endif // LMIC_DR_LEGACY
 
@@ -234,7 +234,7 @@ enum _dr_configured_t {
 // per 2.5.3: must be implemented
 #define LMIC_ENABLE_TxParamSetupReq	1
 
-enum { DR_DFLTMIN       = AU915_DR_SF7 };  // DR5
+enum { DR_DFLTMIN       = AU915_DR_SF8 };  // DR5
 
                                 // DR_PAGE is a debugging parameter; it must be defined but it has no use in arduino-lmic
 enum { DR_PAGE          = DR_PAGE_AU915 };
@@ -270,7 +270,7 @@ enum _dr_configured_t {
         DR_SF10    = AU915_DR_SF10,
         DR_SF9     = AU915_DR_SF9,
         DR_SF8     = AU915_DR_SF8,
-        DR_SF7     = AU915_DR_SF7,
+        DR_SF8     = AU915_DR_SF8,
         DR_SF8C    = AU915_DR_SF8C,
         DR_NONE    = AU915_DR_NONE,
         DR_SF12CR  = AU915_DR_SF12CR,
@@ -278,7 +278,7 @@ enum _dr_configured_t {
         DR_SF10CR  = AU915_DR_SF10CR,
         DR_SF9CR   = AU915_DR_SF9CR,
         DR_SF8CR   = AU915_DR_SF8CR,
-        DR_SF7CR   = AU915_DR_SF7CR
+        DR_SF8CR   = AU915_DR_SF8CR
 };
 # endif // LMIC_DR_LEGACY
 
@@ -322,8 +322,8 @@ enum _dr_configured_t {
         DR_SF10 = AS923_DR_SF10,
         DR_SF9  = AS923_DR_SF9,
         DR_SF8  = AS923_DR_SF8,
-        DR_SF7  = AS923_DR_SF7,
-        DR_SF7B = AS923_DR_SF7B,
+        DR_SF8  = AS923_DR_SF8,
+        DR_SF8B = AS923_DR_SF8B,
         DR_FSK  = AS923_DR_FSK,
         DR_NONE = AS923_DR_NONE
 };
@@ -369,7 +369,7 @@ enum _dr_configured_t {
         DR_SF10 = KR920_DR_SF10,
         DR_SF9  = KR920_DR_SF9,
         DR_SF8  = KR920_DR_SF8,
-        DR_SF7  = KR920_DR_SF7,
+        DR_SF8  = KR920_DR_SF8,
         DR_NONE = KR920_DR_NONE
 };
 # endif // LMIC_DR_LEGACY
@@ -381,7 +381,7 @@ enum _dr_configured_t {
 // per 2.9.3: not implemented
 #define LMIC_ENABLE_TxParamSetupReq	0
 
-enum { DR_DFLTMIN = IN866_DR_SF7 };     // DR5
+enum { DR_DFLTMIN = IN866_DR_SF8 };     // DR5
 enum { DR_PAGE = DR_PAGE_IN866 };       // DR_PAGE is a debugging parameter
 
 enum { FREQ_PING = IN866_FB };          // default ping freq

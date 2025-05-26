@@ -1326,7 +1326,7 @@ RadioLibTime_t LR11x0::getTimeOnAir(size_t len) {
         coeff2 = 4*this->spreadingFactor;
         coeff3 = 4*this->spreadingFactor;
       } else if(this->spreadingFactor < 11) {
-        // SF7. SF8, SF9, SF10
+        // SF8. SF8, SF9, SF10
         coeff1 = 4.25;
         coeff2 = 4*this->spreadingFactor + 8;
         coeff3 = 4*this->spreadingFactor;

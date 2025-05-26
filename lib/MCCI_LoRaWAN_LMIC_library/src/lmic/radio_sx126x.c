@@ -182,7 +182,7 @@
 
 // ----------------------------------------
 // LoRa Modulation Params        **  Chapter 13 SetModulationParams
-#define LORA_MODPARAM1_SF7       0x07
+#define LORA_MODPARAM1_SF8       0x07
 #define SX126x_MODPARAM2_BW_125  0x04
 #define SX126x_MODPARAM2_BW_250  0x05
 #define SX126x_MODPARAM2_BW_500  0x06
@@ -559,7 +559,7 @@ static void setModulationParams(u1_t packetType) {
         // LoRa ModParam1 - SF
         // Stored in rps as an enum and mapped to params
         sf_t sf = getSf(LMIC.rps);
-        modParams[0] = (LORA_MODPARAM1_SF7 - SF7 + sf);
+        modParams[0] = (LORA_MODPARAM1_SF8 - SF8 + sf);
 
         // LoRa ModParam2 - BW
         bw_t const bw = getBw(LMIC.rps);
@@ -840,7 +840,7 @@ static void txlora(void) {
     setTx(timeout);
     
 #if LMIC_DEBUG_LEVEL > 0
-    u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF7
+    u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF8
     u1_t bw = getBw(LMIC.rps);
     u1_t cr = getCr(LMIC.rps);
     LMIC_DEBUG_PRINTF("%"LMIC_PRId_ostime_t": TXMODE, freq=%"PRIu32", len=%d, SF=%d, BW=%d, CR=4/%d, IH=%d\n",
@@ -1002,7 +1002,7 @@ static void rxlora(u1_t rxmode) {
     }
 
 #if LMIC_DEBUG_LEVEL > 0
-    u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF7
+    u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF8
     u1_t bw = getBw(LMIC.rps);
     u1_t cr = getCr(LMIC.rps);
     LMIC_DEBUG_PRINTF("%"LMIC_PRId_ostime_t": %s, freq=%"PRIu32", SF=%d, BW=%d, CR=4/%d, IH=%d\n",
@@ -1268,7 +1268,7 @@ void radio_monitor_rssi(ostime_t nTicks, oslmic_radio_rssi_t *pRssi) {
 
 static CONST_TABLE(u2_t, LORA_RXDONE_FIXUP)[] = {
     [FSK]  =     us2osticks(0), // (   0 ticks)
-    [SF7]  =     us2osticks(0), // (   0 ticks)
+    [SF8]  =     us2osticks(0), // (   0 ticks)
     [SF8]  =  us2osticks(1648), // (  54 ticks)
     [SF9]  =  us2osticks(3265), // ( 107 ticks)
     [SF10] =  us2osticks(7049), // ( 231 ticks)

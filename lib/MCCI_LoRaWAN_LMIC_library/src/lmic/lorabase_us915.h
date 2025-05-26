@@ -47,7 +47,7 @@ enum _dr_us915_t {
         US915_DR_SF10 = 0,
         US915_DR_SF9,
         US915_DR_SF8,
-        US915_DR_SF7,
+        US915_DR_SF8,
         US915_DR_SF8C,
         US915_DR_NONE,
         // Devices "behind a router" (and upper half of DR list):
@@ -56,7 +56,7 @@ enum _dr_us915_t {
         US915_DR_SF10CR,
         US915_DR_SF9CR,
         US915_DR_SF8CR,
-        US915_DR_SF7CR
+        US915_DR_SF8CR
 };
 
 // Default frequency plan for US 915MHz

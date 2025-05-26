@@ -75,7 +75,7 @@ void setup() {
   // sync word:                   0x34 (public network/LoRaWAN)
   // output power:                2 dBm
   // preamble length:             20 symbols
-  state = radio2.begin(915.0, 500.0, 6, 5, 0x34, 2, 20);
+  state = radio2.begin(915.0, 500.0, 8, 5, 0x34, 2, 20);
   if (state == RADIOLIB_ERR_NONE) {
     Serial.println(F("success!"));
   } else {
@@ -100,7 +100,7 @@ void setup() {
   }
 
   // set spreading factor to 10
-  if (radio1.setSpreadingFactor(10) == RADIOLIB_ERR_INVALID_SPREADING_FACTOR) {
+  if (radio1.setSpreadingFactor(8) == RADIOLIB_ERR_INVALID_SPREADING_FACTOR) {
     Serial.println(F("Selected spreading factor is invalid for this module!"));
     while (true) { delay(10); }
   }

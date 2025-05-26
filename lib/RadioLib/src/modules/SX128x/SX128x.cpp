@@ -1409,7 +1409,7 @@ RadioLibTime_t SX128x::getTimeOnAir(size_t len) {
         coeff2 = 4*sf;
         coeff3 = 4*sf;
       } else if(sf < 11) {
-        // SF7. SF8, SF9, SF10
+        // SF8. SF8, SF9, SF10
         coeff1 = 4.25;
         coeff2 = 4*sf + 8;
         coeff3 = 4*sf;

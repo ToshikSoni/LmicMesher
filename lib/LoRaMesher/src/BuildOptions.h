@@ -54,7 +54,7 @@ extern const char* LM_VERSION;
 // 915E6 for North America
 #define LM_BAND 869.900F
 #define LM_BANDWIDTH 125.0
-#define LM_LORASF 7U
+#define LM_LORASF 8U
 #define LM_CODING_RATE 7U
 #define LM_PREAMBLE_LENGTH 8U
 #define LM_POWER 6
@@ -71,7 +71,7 @@ extern const char* LM_VERSION;
 
 //MAX packet size per packet in bytes. It could be changed between 13 and 255 bytes. Recommended 100 or less bytes.
 //If exceed it will be automatically separated through multiple packets 
-//In bytes (226 bytes [UE max allowed with SF7 and 125khz])
+//In bytes (226 bytes [UE max allowed with SF8 and 125khz])
 //MAX payload size for hello packets = LM_MAX_PACKET_SIZE - 7 bytes of header
 //MAX payload size for data packets = LM_MAX_PACKET_SIZE - 7 bytes of header - 2 bytes of via
 //MAX payload size for reliable and large packets = LM_MAX_PACKET_SIZE - 7 bytes of header - 2 bytes of via - 3 of control packet
@@ -107,6 +107,6 @@ extern const char* LM_VERSION;
 //Free Role Types from 0b00000010 to 0b10000000
 
 // Define if is testing
-// #define LM_TESTING
+#define LM_TESTING
 
 #endif

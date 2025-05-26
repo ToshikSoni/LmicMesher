@@ -81,7 +81,7 @@ This is like `os_radio(RADIO_TX)`, but the transmission is scheduled at `LMIC.tx
 
 This is the "radio parameter setting", and it encodes several radio settings.
 
-- Spreading factor: FSK or SF7..12
+- Spreading factor: FSK or SF8..12
 - Bandwidth: 125, 250 or 500 kHz
 - Coding Rate: 4/5, 4/6, 4/7 or 4/8.
 - CRC enabled/disabled

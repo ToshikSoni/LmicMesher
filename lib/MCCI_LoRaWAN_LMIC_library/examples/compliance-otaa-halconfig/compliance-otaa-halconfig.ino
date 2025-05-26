@@ -264,7 +264,7 @@ static void eventjob_cb(osjob_t *j) {
 }
 
 const char *getSfName(rps_t rps) {
-    const char * const t[] = { "FSK", "SF7", "SF8", "SF9", "SF10", "SF11", "SF12", "SFrfu" };
+    const char * const t[] = { "FSK", "SF8", "SF8", "SF9", "SF10", "SF11", "SF12", "SFrfu" };
     return t[getSf(rps)];
 }
 

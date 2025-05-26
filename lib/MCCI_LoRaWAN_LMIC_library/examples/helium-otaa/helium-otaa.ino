@@ -276,7 +276,7 @@ void setup() {
     LMIC_setClockError(1 * MAX_CLOCK_ERROR / 40);
 
     LMIC_setLinkCheckMode(0);
-    LMIC_setDrTxpow(DR_SF7,14);
+    LMIC_setDrTxpow(DR_SF8,14);
 
 #if CFG_LMIC_US_like
     // This makes joins faster in the US because we don't wander all over the

@@ -47,7 +47,7 @@ void setup() {
   // bandwidth:                   125 kHz
   // spreading factor:            12
   // coding rate:                 4/5
-  int state = radio.begin(433.775, 125, 12, 5);
+  int state = radio.begin(433.775, 125, 8, 5);
 
   // when using one of the non-LoRa modules for AX.25
   // (RF69, CC1101, Si4432 etc.), use the basic begin() method

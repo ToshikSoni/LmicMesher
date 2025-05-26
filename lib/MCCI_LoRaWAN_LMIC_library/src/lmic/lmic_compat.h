@@ -41,7 +41,7 @@ extern "C"{
 # define AU921_DR_SF10	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF10
 # define AU921_DR_SF9	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF9
 # define AU921_DR_SF8	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF8
-# define AU921_DR_SF7	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF7
+# define AU921_DR_SF8	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF8
 # define AU921_DR_SF8C	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF8C
 # define AU921_DR_NONE	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_NONE
 # define AU921_DR_SF12CR LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF12CR
@@ -49,7 +49,7 @@ extern "C"{
 # define AU921_DR_SF10CR LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF10CR
 # define AU921_DR_SF9CR	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF9CR
 # define AU921_DR_SF8CR	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF8CR
-# define AU921_DR_SF7CR	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF7CR
+# define AU921_DR_SF8CR	LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_DR_SF8CR
 # define AU921_125kHz_UPFBASE   LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_125kHz_UPFBASE
 # define AU921_125kHz_UPFSTEP   LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_125kHz_UPFSTEP
 # define AU921_500kHz_UPFBASE   LMIC_DEPRECATE(GCC warning "A921 symbols are deprecated EOL V5, use AU915") AU915_500kHz_UPFBASE

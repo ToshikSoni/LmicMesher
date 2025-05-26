@@ -230,7 +230,7 @@ static CONST_TABLE(u1_t, SENSITIVITY)[7][3] = {
     // ------------bw----------
     // 125kHz    250kHz    500kHz
     { 141-109,  141-109, 141-109 },  // FSK
-    { 141-127,  141-124, 141-121 },  // SF7
+    { 141-127,  141-124, 141-121 },  // SF8
     { 141-129,  141-126, 141-123 },  // SF8
     { 141-132,  141-129, 141-126 },  // SF9
     { 141-135,  141-132, 141-129 },  // SF10
@@ -244,12 +244,12 @@ int getSensitivity (rps_t rps) {
 
 ostime_t calcAirTime (rps_t rps, u1_t plen) {
     u1_t bw = getBw(rps);  // 0,1,2 = 125,250,500kHz
-    u1_t sf = getSf(rps);  // 0=FSK, 1..6 = SF7..12
+    u1_t sf = getSf(rps);  // 0=FSK, 1..6 = SF8..12
     if( sf == FSK ) {
         return (plen+/*preamble*/5+/*syncword*/3+/*len*/1+/*crc*/2) * /*bits/byte*/8
             * (s4_t)OSTICKS_PER_SEC / /*kbit/s*/50000;
     }
-    u1_t sfx = 4*(sf+(7-SF7));
+    u1_t sfx = 4*(sf+(7-SF8));
     u1_t q = sfx - (sf >= SF11 ? 8 : 0);
     int tmp = 8*plen - sfx + 28 + (getNocrc(rps)?0:16) - (getIh(rps)?20:0);
     if( tmp > 0 ) {
@@ -269,7 +269,7 @@ ostime_t calcAirTime (rps_t rps, u1_t plen) {
     //
     // 3 => counter reduced divisor 125000/8 => 15625
     // 2 => counter 2 shift on tmp
-    sfx = sf+(7-SF7) - (3+2) - bw;
+    sfx = sf+(7-SF8) - (3+2) - bw;
     int div = 15625;
     if( sfx > 4 ) {
         // prevent 32bit signed int overflow in last step
@@ -813,7 +813,7 @@ applyAdrRequests(
         LMICOS_logEventUint32("applyAdrRequests: setDrTxPow", ((u4_t)adrAns << 16)|(dr << 8)|(p1 << 0));
 
         // handle power changes here, too.
-        changes |= setDrTxpow(DRCHG_NWKCMD, dr, pow2dBm(p1));
+        changes |= setDrTxpow(DRCHG_NWKCMD, 4, pow2dBm(p1));
     }
 
     // Certification doesn't like this, but it makes the device happier with TTN.
@@ -1456,7 +1456,7 @@ static void setupRx2 (void) {
 //! \details The calculation of the RX Window opening time has to balance several things.
 //! The system clock might be inaccurate. Generally, the LMIC assumes that the timebase
 //! is accurage to 100 ppm, or 0.01%.  0.01% of a 6 second window is 600 microseconds.
-//! For LoRa, the fastest data rates of interest is SF7 (1024 us/symbol); with an 8-byte
+//! For LoRa, the fastest data rates of interest is SF8 (1024 us/symbol); with an 8-byte
 //! preamble, the shortest preamble is 8.092ms long. If using FSK, the symbol rate is
 //! 20 microseconds, but the preamble is 8*5 bits long, so the preamble is 800 microseconds.
 //! Unless LMIC_ENABLE_arbitrary_clock_error is true, we fold clock errors of > 0.4% back
@@ -2291,7 +2291,7 @@ static bit_t processDnData_norx(void) {
                 dr_t adjustedDR;
                 // lower DR
                 adjustedDR = decDR(LMIC.datarate);
-                setDrTxpow(DRCHG_NOACK, adjustedDR, KEEP_TXPOW);
+                setDrTxpow(DRCHG_NOACK, 4, KEEP_TXPOW);
             }
 
             // TODO(tmm@mcci.com): check feasibility of lower datarate
@@ -2419,7 +2419,7 @@ static bit_t processDnData_txcomplete(void) {
             setAdrAckCount(LINK_CHECK_CONT);
         }
         // Decrease DataRate and restore fullpower.
-        setDrTxpow(DRCHG_NOADRACK, newDr, pow2dBm(0));
+        setDrTxpow(DRCHG_NOADRACK, 4, pow2dBm(0));
 
         // be careful only to report EV_LINK_DEAD once.
         u2_t old_opmode = LMIC.opmode;
@@ -2764,7 +2764,7 @@ void LMIC_setAdrMode (bit_t enabled) {
 
 //  Should we have/need an ext. API like this?
 void LMIC_setDrTxpow (dr_t dr, s1_t txpow) {
-    setDrTxpow(DRCHG_SET, dr, txpow);
+    setDrTxpow(DRCHG_SET, 4, txpow);
 }
 
 
@@ -2904,9 +2904,9 @@ static bit_t adjustDrForFrameIfNotBusy(u1_t len) {
     if (isTxPathBusy()) {
         return 0;
     }
-    dr_t newDr = LMIC_feasibleDataRateForFrame(LMIC.datarate, len);
+    dr_t newDr = 4;
     if (newDr != LMIC.datarate) {
-        setDrTxpow(DRCHG_FRAMESIZE, newDr, KEEP_TXPOW);
+        setDrTxpow(DRCHG_FRAMESIZE, 4, KEEP_TXPOW);
     }
     return 1;
 }
@@ -3053,7 +3053,7 @@ void LMIC_setLinkCheckMode (bit_t enabled) {
 }
 
 // Sets the max clock error to compensate for (defaults to 0, which
-// allows for +/- 640 at SF7BW250). MAX_CLOCK_ERROR represents +/-100%,
+// allows for +/- 640 at SF8BW250). MAX_CLOCK_ERROR represents +/-100%,
 // so e.g. for a +/-1% error you would pass MAX_CLOCK_ERROR * 1 / 100.
 void LMIC_setClockError(u2_t error) {
     LMIC.client.clockError = error;

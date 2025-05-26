@@ -219,7 +219,7 @@ ostime_t LMICeulike_nextJoinState(uint8_t nDefaultChannels) {
                         // Avoid collision with JOIN ACCEPT @ SF12 being sent by GW (but we missed it)
                         ? DNW2_SAFETY_ZONE
                         // Otherwise: randomize join (street lamp case):
-                        // SF12:255, SF11:127, .., SF7:8secs
+                        // SF12:255, SF11:127, .., SF8:8secs
 			//
                         : DNW2_SAFETY_ZONE + LMICcore_rndDelay(255 >> LMIC.datarate));
         // 1 - triggers EV_JOIN_FAILED event

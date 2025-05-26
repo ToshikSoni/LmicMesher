@@ -2875,7 +2875,7 @@ int16_t LoRaWANNode::setPhyProperties(const LoRaWANChannel_t* chnl, uint8_t dir,
       syncWord[0] = RADIOLIB_LORAWAN_LORA_SYNC_WORD;
       syncWordLen = 1;
       RADIOLIB_DEBUG_PROTOCOL_PRINTLN("LoRa: SF = %d, BW = %5.1f kHz, CR = 4/%d, IQ: %c", 
-                                    dr.lora.spreadingFactor, dr.lora.bandwidth, dr.lora.codingRate, dir ? 'D' : 'U');
+                                    8, dr.lora.bandwidth, dr.lora.codingRate, dir ? 'D' : 'U');
     } break;
 
     case(ModemType_t::RADIOLIB_MODEM_LRFHSS): {

@@ -10,4 +10,8 @@
 // #define CFG_sx1261_radio 1
 #define CFG_sx1262_radio 1
 #define ARDUINO_heltec_wifi_lora_32_V3
-//#define LMIC_USE_INTERRUPTS
+//#define LMIC_USE_INTERRUPTS1
+// Heltec LoRa32 V3.2 Configuration
+#define CFG_us915 1  // or CFG_eu868 for Europe
+#define CFG_sx1262 1
+#define LMIC_USE_INTERRUPTS

@@ -70,7 +70,7 @@ public:
         uint16_t preambleLength = LM_PREAMBLE_LENGTH; // Length of LoRa transmission preamble in symbols. The actual preamble length is 4.25 symbols longer than the set number. Allowed values range from 6 to 65535.
         // MAX packet size per packet in bytes. It could be changed between 13 and 255 bytes. Recommended 100 or less bytes.
         // If exceed it will be automatically separated through multiple packets 
-        // In bytes (226 bytes [UE max allowed with SF7 and 125khz])
+        // In bytes (226 bytes [UE max allowed with SF8 and 125khz])
         // MAX payload size for hello packets = LM_MAX_PACKET_SIZE - 7 bytes of header
         // MAX payload size for data packets = LM_MAX_PACKET_SIZE - 7 bytes of header - 2 bytes of via
         // MAX payload size for reliable and large packets = LM_MAX_PACKET_SIZE - 7 bytes of header - 2 bytes of via - 3 of control packet.

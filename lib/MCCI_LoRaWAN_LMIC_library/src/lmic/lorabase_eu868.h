@@ -55,8 +55,8 @@ enum _dr_eu868_t {
         EU868_DR_SF10,
         EU868_DR_SF9,
         EU868_DR_SF8,
-        EU868_DR_SF7,
-        EU868_DR_SF7B,
+        EU868_DR_SF8,
+        EU868_DR_SF8B,
         EU868_DR_FSK,
         EU868_DR_NONE
 };
@@ -67,15 +67,15 @@ enum _dr_eu868_t {
 //  g3 :  10%  27dBm
 //                 freq             band     datarates
 enum {
-        EU868_F1 = 868100000,      // g1   SF7-12
-        EU868_F2 = 868300000,      // g1   SF7-12 FSK SF7/250
-        EU868_F3 = 868500000,      // g1   SF7-12
-        EU868_F4 = 868850000,      // g2   SF7-12
-        EU868_F5 = 869050000,      // g2   SF7-12
-        EU868_F6 = 869525000,      // g3   SF7-12
-        EU868_J4 = 864100000,      // g2   SF7-12  used during join
-        EU868_J5 = 864300000,      // g2   SF7-12   ditto
-        EU868_J6 = 864500000,      // g2   SF7-12   ditto
+        EU868_F1 = 868100000,      // g1   SF8-12
+        EU868_F2 = 868300000,      // g1   SF8-12 FSK SF8/250
+        EU868_F3 = 868500000,      // g1   SF8-12
+        EU868_F4 = 868850000,      // g2   SF8-12
+        EU868_F5 = 869050000,      // g2   SF8-12
+        EU868_F6 = 869525000,      // g3   SF8-12
+        EU868_J4 = 864100000,      // g2   SF8-12  used during join
+        EU868_J5 = 864300000,      // g2   SF8-12   ditto
+        EU868_J6 = 864500000,      // g2   SF8-12   ditto
 };
 enum {
         EU868_FREQ_MIN = 863000000,

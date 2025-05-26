@@ -161,7 +161,7 @@
 // ----------------------------------------
 // spread factors and mode for RegModemConfig2
 #define SX1272_MC2_FSK  0x00
-#define SX1272_MC2_SF7  0x70
+#define SX1272_MC2_SF8  0x70
 #define SX1272_MC2_SF8  0x80
 #define SX1272_MC2_SF9  0x90
 #define SX1272_MC2_SF10 0xA0
@@ -469,7 +469,7 @@ static void configLoraModem () {
         // set ModemConfig1
         writeReg(LORARegModemConfig1, mc1);
 
-        mc2 = (SX1272_MC2_SF7 + ((sf-1)<<4) + ((LMIC.rxsyms >> 8) & 0x3) );
+        mc2 = (SX1272_MC2_SF8 + ((sf-1)<<4) + ((LMIC.rxsyms >> 8) & 0x3) );
         if (getNocrc(LMIC.rps) == 0) {
             mc2 |= SX1276_MC2_RX_PAYLOAD_CRCON;
         }
@@ -536,7 +536,7 @@ static void configLoraModem () {
 
         // set ModemConfig2 (sf, AgcAutoOn=1 SymbTimeoutHi)
         u1_t mc2;
-        mc2 = (SX1272_MC2_SF7 + ((sf-1)<<4)) | 0x04 | ((LMIC.rxsyms >> 8) & 0x3);
+        mc2 = (SX1272_MC2_SF8 + ((sf-1)<<4)) | 0x04 | ((LMIC.rxsyms >> 8) & 0x3);
 
 #if CFG_TxContinuousMode
         // Only for testing
@@ -846,7 +846,7 @@ static void txlora () {
     opmode(OPMODE_TX);
 
 #if LMIC_DEBUG_LEVEL > 0
-    u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF7
+    u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF8
     u1_t bw = getBw(LMIC.rps);
     u1_t cr = getCr(LMIC.rps);
     LMIC_DEBUG_PRINTF("%"LMIC_PRId_ostime_t": TXMODE, freq=%"PRIu32", len=%d, SF=%d, BW=%d, CR=4/%d, IH=%d\n",
@@ -996,7 +996,7 @@ static void rxlora (u1_t rxmode) {
     if (rxmode == RXMODE_RSSI) {
         LMIC_DEBUG_PRINTF("RXMODE_RSSI\n");
     } else {
-        u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF7
+        u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF8
         u1_t bw = getBw(LMIC.rps);
         u1_t cr = getCr(LMIC.rps);
         LMIC_DEBUG_PRINTF("%"LMIC_PRId_ostime_t": %s, freq=%"PRIu32", SF=%d, BW=%d, CR=4/%d, IH=%d\n",
@@ -1256,7 +1256,7 @@ void radio_monitor_rssi(ostime_t nTicks, oslmic_radio_rssi_t *pRssi) {
 
 static CONST_TABLE(u2_t, LORA_RXDONE_FIXUP)[] = {
     [FSK]  =     us2osticks(0), // (   0 ticks)
-    [SF7]  =     us2osticks(0), // (   0 ticks)
+    [SF8]  =     us2osticks(0), // (   0 ticks)
     [SF8]  =  us2osticks(1648), // (  54 ticks)
     [SF9]  =  us2osticks(3265), // ( 107 ticks)
     [SF10] =  us2osticks(7049), // ( 231 ticks)

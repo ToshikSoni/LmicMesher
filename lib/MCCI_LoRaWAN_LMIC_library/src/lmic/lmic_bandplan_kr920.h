@@ -61,7 +61,7 @@ LMICkr920_isValidBeacon1(const uint8_t *d) {
 #undef LMICbandplan_isFSK
 #define LMICbandplan_isFSK()    (/* always false */ 0)
 
-#define LMICbandplan_getInitialDrJoin() (KR920_DR_SF7)
+#define LMICbandplan_getInitialDrJoin() (KR920_DR_SF8)
 
 void LMICkr920_setBcnRxParams(void);
 #define LMICbandplan_setBcnRxParams()   LMICkr920_setBcnRxParams()

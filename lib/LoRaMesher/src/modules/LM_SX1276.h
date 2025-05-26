@@ -42,7 +42,7 @@ public:
 
     int16_t setFrequency(float freq) override;
     int16_t setBandwidth(float bw) override;
-    int16_t setSpreadingFactor(uint8_t sf) override;
+    int16_t setSpreadingFactor(uint8_t sf=8) override;
     int16_t setCodingRate(uint8_t cr) override;
     int16_t setSyncWord(uint8_t syncWord) override;
     int16_t setOutputPower(int8_t power) override;

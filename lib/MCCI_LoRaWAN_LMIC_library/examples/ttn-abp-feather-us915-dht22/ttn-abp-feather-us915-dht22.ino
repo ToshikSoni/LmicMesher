@@ -268,7 +268,7 @@ void setup() {
     LMIC.dn2Dr = DR_SF9;
 
     // Set data rate and transmit power for uplink
-    LMIC_setDrTxpow(DR_SF7,14);
+    LMIC_setDrTxpow(DR_SF8,14);
 
     // Start job
     do_send(&sendjob);

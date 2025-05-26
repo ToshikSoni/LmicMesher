@@ -49,8 +49,8 @@ CONST_TABLE(u1_t, _DR2RPS_CRC)[] = {
         (u1_t)MAKERPS(SF10, BW125, CR_4_5, 0, 0),       // [2]
         (u1_t)MAKERPS(SF9,  BW125, CR_4_5, 0, 0),       // [3]
         (u1_t)MAKERPS(SF8,  BW125, CR_4_5, 0, 0),       // [4]
-        (u1_t)MAKERPS(SF7,  BW125, CR_4_5, 0, 0),       // [5]
-        (u1_t)MAKERPS(SF7,  BW250, CR_4_5, 0, 0),       // [6]
+        (u1_t)MAKERPS(SF8,  BW125, CR_4_5, 0, 0),       // [5]
+        (u1_t)MAKERPS(SF8,  BW250, CR_4_5, 0, 0),       // [6]
         (u1_t)MAKERPS(FSK,  BW125, CR_4_5, 0, 0),       // [7]
         ILLEGAL_RPS
 };
@@ -168,8 +168,8 @@ static CONST_TABLE(ostime_t, DR2HSYM_osticks)[] = {
         us2osticksRound(128 << 5),  // DR_SF10
         us2osticksRound(128 << 4),  // DR_SF9
         us2osticksRound(128 << 3),  // DR_SF8
-        us2osticksRound(128 << 2),  // DR_SF7
-        us2osticksRound(128 << 1),  // DR_SF7B: 250K bps, DR_SF7
+        us2osticksRound(128 << 2),  // DR_SF8
+        us2osticksRound(128 << 1),  // DR_SF8B: 250K bps, DR_SF8
         us2osticksRound(80)         // FSK -- not used (time for 1/2 byte)
 };
 
@@ -200,7 +200,7 @@ void LMICas923_initDefaultChannels(bit_t join) {
         LMIC.channelMap = (1 << NUM_DEFAULT_CHANNELS) - 1;
         for (u1_t fu = 0; fu<NUM_DEFAULT_CHANNELS; fu++) {
                 LMIC.channelFreq[fu] = TABLE_GET_U4(iniChannelFreq, fu);
-                LMIC.channelDrMap[fu] = DR_RANGE_MAP(AS923_DR_SF12, AS923_DR_SF7B);
+                LMIC.channelDrMap[fu] = DR_RANGE_MAP(AS923_DR_SF12, AS923_DR_SF8B);
         }
 
         LMIC.bands[BAND_CENTI].txcap = AS923_TX_CAP;
@@ -274,7 +274,7 @@ bit_t LMIC_setupChannel(u1_t chidx, u4_t freq, u2_t drmap, s1_t band) {
         }
         LMIC.channelFreq[chidx] = freq;
         LMIC.channelDrMap[chidx] =
-		drmap == 0 ? DR_RANGE_MAP(AS923_DR_SF12, AS923_DR_SF7B)
+		drmap == 0 ? DR_RANGE_MAP(AS923_DR_SF12, AS923_DR_SF8B)
 		           : drmap;
         if (fEnable)
                 LMIC.channelMap |= 1 << chidx;  // enabled right away

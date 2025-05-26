@@ -138,6 +138,8 @@ void os_runloop () {
 }
 
 void os_runloop_once() {
+    LMIC_setDrTxpow(4, 14);
+    LMIC_setAdrMode(0);
     osjob_t* j = NULL;
     lmic_hal_processPendingIRQs();
 
