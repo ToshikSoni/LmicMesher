@@ -139,6 +139,7 @@ void setupLoraMesher() {
     config.loraRst = RST;
     config.loraIrq = IRQ;
     config.loraIo1 = IO1;
+    config.syncWord = 0x45;
 
     #ifdef HELTEC
         SPI.begin(9, 11, 10, CS); //Initialize SPI with the correct pins

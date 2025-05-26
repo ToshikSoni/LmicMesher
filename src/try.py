@@ -3,8 +3,8 @@ import time
 from collections import deque
 
 # Replace with actual ports
-COM_IN = '/dev/ttyUSB0'
-COM_OUT = '/dev/ttyUSB1'
+COM_IN = '/dev/cu.usbserial-3'
+COM_OUT = '/dev/cu.usbserial-0001'
 BAUD_RATE = 115200
 CHUNK_SIZE = 51
 

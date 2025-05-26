@@ -74,14 +74,14 @@ void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
 
 // This should also be in little endian format, see above.
-static const u1_t PROGMEM DEVEUI[8]={0x8a, 0xbf, 0xaa, 0xdd, 0x59, 0xb2, 0x2f, 0x7e}; //7E2FB259DDAABF8A
+static const u1_t PROGMEM DEVEUI[8]={0xac, 0x94, 0xb1, 0xb8, 0xb4, 0x0f, 0x68, 0xf5}; //f5680fb4b8b194ac
 void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
 
 
 // This key should be in big endian format (or, since it is not really a
 // number but a block of memory, endianness does not really apply). In
 // practice, a key taken from ttnctl can be copied as-is.
-static const u1_t PROGMEM APPKEY[16] = {0xBC, 0xD0, 0x7B, 0x8B, 0x6C, 0x91, 0xB4, 0x62, 0xC3, 0x22, 0xA8, 0xAC, 0xAB, 0x4B, 0x52, 0xBB};
+static const u1_t PROGMEM APPKEY[16] = {0x96,0x44,0x4b,0xef,0xd2,0xbf,0x4e,0x30,0xdf,0x44,0xa1,0xbf,0x9c,0x84,0xa2,0x1b};//96444befd2bf4e30df44a1bf9c84a21b
 void os_getDevKey (u1_t* buf) {  memcpy_P(buf, APPKEY, 16);}
 
 static uint8_t mydata[] = "Hello World";
