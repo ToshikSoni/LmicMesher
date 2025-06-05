@@ -11,8 +11,13 @@
 #define RST 12
 #define IRQ 14
 #define IO1 13
+
+// LoRaWAN control flags
 bool hasJoined = false;
 bool hasFoundDR = false;
+portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+
+// Function to send data via LoRaWAN
 void do_send(uint8_t myData[], size_t size)
 {
     if (LMIC.opmode & OP_TXRXPEND)
@@ -35,6 +40,8 @@ void do_send(uint8_t myData[], size_t size)
         Serial.println(F("Packet queued"));
     }
 }
+
+// LoRaWAN task
 void loraWANTask(void *parameter)
 {
     Serial.println("LoRaWAN task started on core " + String(xPortGetCoreID()));
@@ -48,6 +55,8 @@ void loraWANTask(void *parameter)
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
+
+// LoRaMesher setup
 LoraMesher &radio = LoraMesher::getInstance();
 uint32_t dataCounter = 0;
 struct dataPacket
@@ -59,6 +68,8 @@ struct dataPacket
 };
 dataPacket *helloPacket = new dataPacket;
 TaskHandle_t receiveLoRaMessage_Handle = NULL;
+
+// LED flash helper
 void led_Flash(uint16_t flashes, uint16_t delaymS)
 {
     uint16_t index;
@@ -70,6 +81,8 @@ void led_Flash(uint16_t flashes, uint16_t delaymS)
         delay(delaymS);
     }
 }
+
+// Send a broadcast message via LoRaMesher
 void sendBroadcastMessage()
 {
     led_Flash(1, 100);
@@ -79,24 +92,62 @@ void sendBroadcastMessage()
     snprintf(helloPacket->message, sizeof(helloPacket->message), "Hello #%d", dataCounter);
     Serial.println("Broadcasting discovery message...");
     Serial.printf("Message: %s\n", helloPacket->message);
-    radio.createPacketAndSend(44992, helloPacket, 1);
+    radio.createPacketAndSend(44992, helloPacket, sizeof(dataPacket)); // Fixed to send full packet size
     Serial.println("Broadcast sent!");
 }
+
+// MODIFIED: Process received LoRaMesher packets and forward to LoRaWAN
 void processReceivedPackets(void *)
 {
     for (;;)
     {
         ulTaskNotifyTake(pdPASS, portMAX_DELAY);
-        led_Flash(3, 100);
+        led_Flash(3, 100); // Quick LED flash to indicate packet arrival
+
         while (radio.getReceivedQueueSize() > 0)
         {
             Serial.println("ReceivedUserData_TaskHandle notify received");
             Serial.printf("Queue receiveUserData size: %d\n", radio.getReceivedQueueSize());
+
+            // Get the packet from LoRaMesher
             AppPacket<dataPacket> *packet = radio.getNextAppPacket<dataPacket>();
-            radio.deletePacket(packet);
+            if (packet != NULL)
+            {
+                Serial.println("=== RECEIVED LORAMESHER PACKET ===");
+                Serial.printf("From: 0x%04X\n", packet->src);
+                Serial.printf("Message ID: %d\n", packet->payload->messageId);
+                Serial.printf("Message: %s\n", packet->payload->message);
+
+                // Forward to LoRaWAN if we're connected
+                bool shouldForward = false;
+                portENTER_CRITICAL(&mux);
+                shouldForward = hasJoined;
+                portEXIT_CRITICAL(&mux);
+
+                if (shouldForward)
+                {
+                    Serial.println("=== FORWARDING TO LORAWAN ===");
+                    // Create a formatted message for forwarding
+                    char forwardMsg[80];
+                    snprintf(forwardMsg, sizeof(forwardMsg),
+                             "FWD-%04X: %s", packet->src, packet->payload->message);
+
+                    // Send via LoRaWAN
+                    do_send((uint8_t *)forwardMsg, strlen(forwardMsg));
+                    led_Flash(2, 50); // Indicate forwarding with quick flashes
+                }
+                else
+                {
+                    Serial.println("Cannot forward: not joined to LoRaWAN network");
+                }
+
+                // Delete the packet when done
+                radio.deletePacket(packet);
+            }
         }
     }
 }
+
 void createReceiveMessages()
 {
     int res = xTaskCreate(
@@ -110,6 +161,7 @@ void createReceiveMessages()
         Serial.printf("Error: Receive App Task creation gave error: %d\n", res);
     radio.setReceiveAppDataTaskHandle(receiveLoRaMessage_Handle);
 }
+
 void createLoRaWANTask()
 {
     int res = xTaskCreate(
@@ -120,15 +172,19 @@ void createLoRaWANTask()
         3,
         NULL);
 }
+
+// LoRaWAN credentials
 static const u1_t PROGMEM APPEUI[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 void os_getArtEui(u1_t *buf) { memcpy_P(buf, APPEUI, 8); }
 static const u1_t PROGMEM DEVEUI[8] = {0x52, 0x5e, 0x26, 0x00, 0x47, 0x7c, 0x8d, 0xb2};
 void os_getDevEui(u1_t *buf) { memcpy_P(buf, DEVEUI, 8); }
 static const u1_t PROGMEM APPKEY[16] = {0xa5, 0xc4, 0x27, 0x65, 0xd3, 0x8a, 0x31, 0x2a, 0x66, 0xe3, 0x77, 0xfd, 0xf5, 0x48, 0x37, 0x84};
 void os_getDevKey(u1_t *buf) { memcpy_P(buf, APPKEY, 16); }
+
 static uint8_t mydata[] = "Hello World";
 static osjob_t sendjob;
 const unsigned TX_INTERVAL = 10;
+
 void setupLoraMesher()
 {
     Serial.println("Setting up LoRaMesher for India 865MHz SF8 DR5...");
@@ -160,6 +216,7 @@ void setupLoraMesher()
     radio.start();
     Serial.println("LoRaMesher initialized for Indian region!");
 }
+
 class cHalConfiguration_t : public Arduino_LMIC::HalConfiguration_t
 {
 public:
@@ -168,7 +225,9 @@ public:
     virtual bool queryUsingDIO2AsRfSwitch(void) override { return true; };
     virtual bool queryUsingDIO3AsTCXOSwitch(void) override { return true; };
 };
+
 cHalConfiguration_t myConfig;
+
 const lmic_pinmap lmic_pins = {
     .nss = 8,
     .rxtx = LMIC_UNUSED_PIN,
@@ -176,6 +235,7 @@ const lmic_pinmap lmic_pins = {
     .dio = {14, LMIC_UNUSED_PIN, LMIC_UNUSED_PIN},
     .pConfig = &myConfig,
 };
+
 void printHex2(unsigned v)
 {
     v &= 0xff;
@@ -183,6 +243,8 @@ void printHex2(unsigned v)
         Serial.print('0');
     Serial.print(v, HEX);
 }
+
+// LoRaWAN event handler with thread-safe flag update
 void onEvent(ev_t ev)
 {
     Serial.print(os_getTime());
@@ -234,8 +296,15 @@ void onEvent(ev_t ev)
             Serial.println();
         }
         LMIC_setLinkCheckMode(0);
+
+        // Thread-safe update of joined status
+        portENTER_CRITICAL(&mux);
         hasJoined = true;
+        portEXIT_CRITICAL(&mux);
+
+        Serial.println("*** LORAWAN CONNECTED - FORWARDING ENABLED ***");
         break;
+
     case EV_JOIN_FAILED:
         Serial.println(F("EV_JOIN_FAILED"));
         break;
@@ -276,6 +345,10 @@ void onEvent(ev_t ev)
         break;
     case EV_LINK_DEAD:
         Serial.println(F("EV_LINK_DEAD"));
+        portENTER_CRITICAL(&mux);
+        hasJoined = false;
+        portEXIT_CRITICAL(&mux);
+        Serial.println("*** LORAWAN DISCONNECTED - FORWARDING DISABLED ***");
         break;
     case EV_LINK_ALIVE:
         Serial.println(F("EV_LINK_ALIVE"));
@@ -297,30 +370,41 @@ void onEvent(ev_t ev)
         break;
     }
 }
+
 void setup()
 {
     Serial.begin(115200);
     delay(2000);
     pinMode(BOARD_LED, OUTPUT);
     Serial.println(F("Starting"));
+    Serial.println(F("LORAMESHER TO LORAWAN BRIDGE"));
     led_Flash(8, 100);
+
     pinMode(Vext, OUTPUT);
     digitalWrite(Vext, LOW);
+
+    // Initialize hardware - explicit radio reset
     pinMode(lmic_pins.rst, OUTPUT);
     digitalWrite(lmic_pins.rst, LOW);
     delay(10);
     digitalWrite(lmic_pins.rst, HIGH);
     delay(10);
+
+    // Disable watchdog timers to prevent crashes
     disableCore0WDT();
     disableCore1WDT();
+
+    // Setup both radio services
     setupLoraMesher();
     createLoRaWANTask();
+
     uint16_t myAddress = radio.getLocalAddress();
     Serial.println("\n=== DEVICE INFORMATION ===");
     Serial.printf("My Device Address: 0x%04X (%d)\n", myAddress, myAddress);
-
+    Serial.println("This device will forward all received LoRaMesher messages to LoRaWAN");
     Serial.println("Setup complete - now running from main loop");
 }
+
 void printByteArrayHex(uint8_t *x, size_t len)
 {
     for (size_t i = 0; i < len; i++)
@@ -332,8 +416,10 @@ void printByteArrayHex(uint8_t *x, size_t len)
     }
     Serial.println();
 }
+
 void loop()
 {
+    // Handle serial input and forward to LoRaWAN
     if (Serial.available())
     {
         String msg = Serial.readStringUntil('\n');
@@ -346,12 +432,31 @@ void loop()
             for (size_t i = 0; i < len; i++)
                 Serial.print((char)buffer[i]);
             Serial.println();
-            do_send(buffer, len);
+
+            // Send via LoRaWAN
+            portENTER_CRITICAL(&mux);
+            bool canSend = hasJoined;
+            portEXIT_CRITICAL(&mux);
+
+            if (canSend)
+            {
+                do_send(buffer, len);
+            }
+            else
+            {
+                Serial.println("Cannot send: not joined to LoRaWAN network");
+            }
         }
     }
-    Serial.printf("\n=== SENDING PACKET #%d ===\n", dataCounter + 1);
-    sendBroadcastMessage();
-    Serial.println("Waiting 15 seconds for next transmission...\n");
-    delay(15000);
-    delay(10);
+
+    // Periodic broadcast to help discover this bridge node
+    static unsigned long lastBroadcast = 0;
+    if (millis() - lastBroadcast > 15000)
+    { // Every 15 seconds
+        Serial.printf("\n=== SENDING PACKET #%d ===\n", dataCounter + 1);
+        sendBroadcastMessage();
+        lastBroadcast = millis();
+    }
+
+    delay(10); // Small delay for task scheduling
 }
