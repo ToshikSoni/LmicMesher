@@ -4,6 +4,8 @@
 #include <hal/hal.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <queue>
+
 #define BOARD_LED 35
 #define LED_ON HIGH
 #define LED_OFF LOW
@@ -12,49 +14,41 @@
 #define IRQ 14
 #define IO1 13
 
+// Forward declarations for functions used before their definition
+void setupLoraMesher();
+void loraWANTask(void *parameter);
+
+// Radio state management
+enum RadioState
+{
+    RADIO_LORAMESHER, // LoRaMesher is active
+    RADIO_LORAWAN,    // LoRaWAN is active
+    RADIO_SWITCHING   // Radio is being reconfigured
+};
+RadioState currentRadioState = RADIO_LORAWAN; // Start with LoRaWAN
+
 // LoRaWAN control flags
 bool hasJoined = false;
 bool hasFoundDR = false;
+bool loraMesherActive = false;
+bool waitingForTxComplete = false;
+unsigned long lastForwardTime = 0;
+TaskHandle_t loRaWANTaskHandle = NULL;
 portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
-// Function to send data via LoRaWAN
-void do_send(uint8_t myData[], size_t size)
+// Message forwarding queue
+struct ForwardMessage
 {
-    if (LMIC.opmode & OP_TXRXPEND)
-        Serial.println(F("OP_TXRXPEND, not sending"));
-    else
-    {
-        Serial.println(size);
-        int status = LMIC_setTxData2(5, myData, size, 0);
-        Serial.println(status);
-        if (status == -1)
-        {
-            Serial.println("Adjusting TX Data Rate... Data Not Sent");
-            hasFoundDR = false;
-        }
-        else if (status == 0)
-        {
-            Serial.println("Adjusted DR");
-            hasFoundDR = true;
-        }
-        Serial.println(F("Packet queued"));
-    }
-}
+    char message[80];
+    size_t length;
+};
+std::queue<ForwardMessage> forwardQueue;
 
-// LoRaWAN task
-void loraWANTask(void *parameter)
-{
-    Serial.println("LoRaWAN task started on core " + String(xPortGetCoreID()));
-    os_init();
-    LMIC_reset();
-    uint8_t initData[] = "Hello";
-    do_send(initData, sizeof(initData));
-    for (;;)
-    {
-        os_runloop_once();
-        vTaskDelay(1 / portTICK_PERIOD_MS);
-    }
-}
+// Function declarations for functions used in event handler
+void activateLoRaWAN();
+void activateLoRaMesher();
+void forwardViaLoRaWAN(const char *message);
+void processForwardQueue();
 
 // LoRaMesher setup
 LoraMesher &radio = LoraMesher::getInstance();
@@ -68,6 +62,210 @@ struct dataPacket
 };
 dataPacket *helloPacket = new dataPacket;
 TaskHandle_t receiveLoRaMessage_Handle = NULL;
+
+// LoRaWAN task implementation
+void loraWANTask(void *parameter)
+{
+    Serial.println("LoRaWAN task started on core " + String(xPortGetCoreID()));
+    os_init();
+    LMIC_reset();
+
+    // Send initial join request
+    LMIC_startJoining();
+    Serial.println("Started joining LoRaWAN network...");
+
+    for (;;)
+    {
+        // Only run LMIC when in LoRaWAN mode
+        if (currentRadioState == RADIO_LORAWAN)
+        {
+            os_runloop_once();
+        }
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+}
+
+// Function to send data via LoRaWAN
+void do_send(uint8_t myData[], size_t size)
+{
+    if (LMIC.opmode & OP_TXRXPEND)
+    {
+        Serial.println(F("OP_TXRXPEND, not sending"));
+
+        // Queue the message for later
+        ForwardMessage newMsg;
+        memcpy(newMsg.message, myData, size);
+        newMsg.length = size;
+        forwardQueue.push(newMsg);
+        Serial.println("Message queued for later transmission");
+    }
+    else
+    {
+        Serial.println(size);
+        int status = LMIC_setTxData2(5, myData, size, 0);
+        Serial.println(status);
+        if (status == -1)
+        {
+            Serial.println("Adjusting TX Data Rate... Data Not Sent");
+            hasFoundDR = false;
+
+            // Queue the message for later retry
+            ForwardMessage newMsg;
+            memcpy(newMsg.message, myData, size);
+            newMsg.length = size;
+            forwardQueue.push(newMsg);
+            Serial.println("Message queued for later retry");
+        }
+        else if (status == 0)
+        {
+            Serial.println("Adjusted DR");
+            hasFoundDR = true;
+            Serial.println(F("Packet queued"));
+            waitingForTxComplete = true;
+            lastForwardTime = millis();
+        }
+    }
+}
+
+// Radio switching functions - FIXED
+void activateLoRaWAN()
+{
+    Serial.println("Activating LoRaWAN...");
+    currentRadioState = RADIO_SWITCHING;
+
+    // If LoRaMesher was active, we need to properly suspend its tasks
+    if (loraMesherActive)
+    {
+        Serial.println("Suspending LoRaMesher tasks...");
+        // Use LoRaMesher's standby method to properly suspend all tasks
+        radio.standby();
+        
+        // Reset the radio hardware
+        pinMode(RST, OUTPUT);
+        digitalWrite(RST, LOW);
+        delay(20);
+        digitalWrite(RST, HIGH);
+        delay(50);
+        loraMesherActive = false;
+    }
+
+    // Complete LMIC reset - FIX 1
+    os_init();
+    LMIC_reset();
+    LMIC_setClockError(MAX_CLOCK_ERROR * 5 / 100); // Add clock error tolerance
+
+    // If already joined, restore session settings
+    if (hasJoined)
+    {
+        LMIC_setLinkCheckMode(0);
+        LMIC_setAdrMode(0);
+    }
+
+    // Wait for LMIC to stabilize - FIX 2
+    delay(250);
+
+    currentRadioState = RADIO_LORAWAN;
+    Serial.println("LoRaWAN activated");
+}
+
+void activateLoRaMesher()
+{
+    Serial.println("Activating LoRaMesher...");
+    currentRadioState = RADIO_SWITCHING;
+
+    // Reset the radio hardware first
+    pinMode(RST, OUTPUT);
+    digitalWrite(RST, LOW);
+    delay(20);
+    digitalWrite(RST, HIGH);
+    delay(50);
+
+    // If LoRaMesher was already set up but just suspended
+    if (loraMesherActive)
+    {
+        // Just restart the tasks
+        Serial.println("Resuming LoRaMesher tasks...");
+        radio.start();
+    }
+    else
+    {
+        // Initialize or reinitialize LoRaMesher fully
+        setupLoraMesher();
+        loraMesherActive = true;
+    }
+
+    currentRadioState = RADIO_LORAMESHER;
+    Serial.println("LoRaMesher activated");
+}
+
+// Forward a message via LoRaWAN - FIXED
+void forwardViaLoRaWAN(const char *message)
+{
+    // Switch to LoRaWAN if needed
+    if (currentRadioState != RADIO_LORAWAN)
+    {
+        activateLoRaWAN();
+    }
+
+    // Allow LMIC to stabilize - FIX 3
+    delay(100);
+
+    // Check if LMIC is busy - FIX 4
+    if (LMIC.opmode & OP_TXRXPEND)
+    {
+        Serial.println("LMIC busy (OP_TXRXPEND), queuing message for later");
+
+        // Queue the message for later
+        ForwardMessage newMsg;
+        size_t msgLen = strlen(message);
+        strncpy(newMsg.message, message, sizeof(newMsg.message));
+        newMsg.length = msgLen;
+        forwardQueue.push(newMsg);
+        return;
+    }
+
+    // Send the message
+    Serial.println("Forwarding message via LoRaWAN:");
+    Serial.println(message);
+    do_send((uint8_t *)message, strlen(message));
+}
+
+// Process the forward queue
+void processForwardQueue()
+{
+    if (forwardQueue.empty())
+    {
+        return;
+    }
+
+    // Don't process if LMIC is busy
+    if (LMIC.opmode & OP_TXRXPEND)
+    {
+        Serial.println("LMIC busy, will retry queue processing later");
+        return;
+    }
+
+    ForwardMessage msg = forwardQueue.front();
+    forwardQueue.pop();
+
+    Serial.println("Processing queued message:");
+    Serial.println(msg.message);
+
+    // Send directly with LMIC to bypass checks - FIX 5
+    int status = LMIC_setTxData2(5, (uint8_t *)msg.message, msg.length, 0);
+    if (status == 0)
+    {
+        Serial.println("Queued message sent to LMIC");
+        waitingForTxComplete = true;
+        lastForwardTime = millis();
+    }
+    else
+    {
+        Serial.printf("Failed to send queued message, error: %d\n", status);
+        // Put back in queue for retry
+        forwardQueue.push(msg);
+    }
+}
 
 // LED flash helper
 void led_Flash(uint16_t flashes, uint16_t delaymS)
@@ -85,6 +283,13 @@ void led_Flash(uint16_t flashes, uint16_t delaymS)
 // Send a broadcast message via LoRaMesher
 void sendBroadcastMessage()
 {
+    // Check if radio is in the right mode
+    if (currentRadioState != RADIO_LORAMESHER)
+    {
+        Serial.println("Cannot broadcast: Radio not in LoRaMesher mode");
+        return;
+    }
+
     led_Flash(1, 100);
     helloPacket->messageId = ++dataCounter;
     helloPacket->timestamp = millis();
@@ -92,11 +297,11 @@ void sendBroadcastMessage()
     snprintf(helloPacket->message, sizeof(helloPacket->message), "Hello #%d", dataCounter);
     Serial.println("Broadcasting discovery message...");
     Serial.printf("Message: %s\n", helloPacket->message);
-    radio.createPacketAndSend(44992, helloPacket, sizeof(dataPacket)); // Fixed to send full packet size
+    radio.createPacketAndSend(44992, helloPacket, sizeof(dataPacket));
     Serial.println("Broadcast sent!");
 }
 
-// MODIFIED: Process received LoRaMesher packets and forward to LoRaWAN
+// Process received LoRaMesher packets and forward to LoRaWAN
 void processReceivedPackets(void *)
 {
     for (;;)
@@ -126,14 +331,27 @@ void processReceivedPackets(void *)
 
                 if (shouldForward)
                 {
-                    Serial.println("=== FORWARDING TO LORAWAN ===");
                     // Create a formatted message for forwarding
                     char forwardMsg[80];
                     snprintf(forwardMsg, sizeof(forwardMsg),
                              "FWD-%04X: %s", packet->src, packet->payload->message);
 
-                    // Send via LoRaWAN
-                    do_send((uint8_t *)forwardMsg, strlen(forwardMsg));
+                    // Check if we can forward directly or need to queue
+                    if (forwardQueue.empty() && !waitingForTxComplete)
+                    {
+                        Serial.println("=== FORWARDING TO LORAWAN ===");
+                        forwardViaLoRaWAN(forwardMsg);
+                    }
+                    else
+                    {
+                        // Add to queue
+                        ForwardMessage newMsg;
+                        strncpy(newMsg.message, forwardMsg, sizeof(newMsg.message));
+                        newMsg.length = strlen(forwardMsg);
+                        forwardQueue.push(newMsg);
+                        Serial.println("=== MESSAGE QUEUED FOR FORWARDING ===");
+                    }
+
                     led_Flash(2, 50); // Indicate forwarding with quick flashes
                 }
                 else
@@ -169,8 +387,10 @@ void createLoRaWANTask()
         "LoRaWAN Task",
         8192,
         (void *)1,
-        5,
-        NULL);
+        3,
+        &loRaWANTaskHandle);
+    if (res != pdPASS)
+        Serial.printf("Error: LoRaWAN Task creation gave error: %d\n", res);
 }
 
 // LoRaWAN credentials
@@ -211,9 +431,19 @@ void setupLoraMesher()
     Serial.printf("Output Power: %d dBm\n", config.power);
     Serial.printf("Data Rate: DR5 (SF8BW125)\n");
     Serial.println("Region: India 865MHz band");
+    
+    // Initialize radio with configuration
     radio.begin(config);
+    
+    // Create receive task
     createReceiveMessages();
+    
+    // Mark LoRaMesher as active
+    loraMesherActive = true;
+    
+    // Start LoRaMesher - this activates all tasks
     radio.start();
+    
     Serial.println("LoRaMesher initialized for Indian region!");
 }
 
@@ -302,11 +532,16 @@ void onEvent(ev_t ev)
         hasJoined = true;
         portEXIT_CRITICAL(&mux);
 
-        Serial.println("*** LORAWAN CONNECTED - FORWARDING ENABLED ***");
+        Serial.println("*** LORAWAN CONNECTED - SWITCHING TO LORAMESHER ***");
+
+        // Now that we've joined LoRaWAN, switch to LoRaMesher mode
+        activateLoRaMesher();
         break;
 
     case EV_JOIN_FAILED:
         Serial.println(F("EV_JOIN_FAILED"));
+        // Try to still use LoRaMesher mode even if LoRaWAN join failed
+        activateLoRaMesher();
         break;
     case EV_REJOIN_FAILED:
         Serial.println(F("EV_REJOIN_FAILED"));
@@ -323,15 +558,27 @@ void onEvent(ev_t ev)
             Serial.print("RETURN:");
             for (int i = 0; i < LMIC.dataLen; i++)
             {
-                Serial.print((LMIC.frame[LMIC.dataBeg + i]));
+                Serial.print((char)(LMIC.frame[LMIC.dataBeg + i]));
                 Serial.print(" ");
             }
             Serial.println();
         }
-        if (!hasFoundDR)
+
+        // Reset the waiting flag
+        waitingForTxComplete = false;
+
+        // Check if there are more messages to send
+        if (!forwardQueue.empty())
         {
-            uint8_t data[] = "hello";
-            do_send(data, sizeof(data));
+            // Process the next message in queue
+            Serial.println("Processing next message in queue");
+            processForwardQueue();
+        }
+        else
+        {
+            // No more messages, switch back to LoRaMesher mode
+            Serial.println("No more messages to forward, switching back to LoRaMesher");
+            activateLoRaMesher();
         }
         break;
     case EV_LOST_TSYNC:
@@ -378,31 +625,33 @@ void setup()
     pinMode(BOARD_LED, OUTPUT);
     Serial.println(F("Starting"));
     Serial.println(F("LORAMESHER TO LORAWAN BRIDGE"));
+    Serial.println(F("Current Date/Time: 2025-06-05 09:29:10"));
     led_Flash(8, 100);
 
     pinMode(Vext, OUTPUT);
     digitalWrite(Vext, LOW);
 
     // Initialize hardware - explicit radio reset
-    pinMode(lmic_pins.rst, OUTPUT);
-    digitalWrite(lmic_pins.rst, LOW);
-    delay(10);
-    digitalWrite(lmic_pins.rst, HIGH);
-    delay(10);
+    pinMode(RST, OUTPUT);
+    digitalWrite(RST, LOW);
+    delay(20);
+    digitalWrite(RST, HIGH);
+    delay(50);
 
     // Disable watchdog timers to prevent crashes
     disableCore0WDT();
     disableCore1WDT();
 
-    // Setup both radio services
-    setupLoraMesher();
+    // LMIC configuration improvements - FIX 6
+    LMIC_setClockError(MAX_CLOCK_ERROR * 5 / 100);
+
+    // First create and start LoRaWAN task
+    Serial.println("Starting in LoRaWAN mode for initial network join");
     createLoRaWANTask();
 
-    uint16_t myAddress = radio.getLocalAddress();
-    Serial.println("\n=== DEVICE INFORMATION ===");
-    Serial.printf("My Device Address: 0x%04X (%d)\n", myAddress, myAddress);
-    Serial.println("This device will forward all received LoRaMesher messages to LoRaWAN");
-    Serial.println("Setup complete - now running from main loop");
+    // LoraMesher will be activated after LoRaWAN join is complete
+
+    Serial.println("Setup complete - waiting for LoRaWAN join before activating LoRaMesher");
 }
 
 void printByteArrayHex(uint8_t *x, size_t len)
@@ -419,43 +668,108 @@ void printByteArrayHex(uint8_t *x, size_t len)
 
 void loop()
 {
-    // Handle serial input and forward to LoRaWAN
+    // Handle serial input and commands
     if (Serial.available())
     {
         String msg = Serial.readStringUntil('\n');
-        uint8_t buffer[51];
-        size_t len = msg.length();
-        if (len > 0 && len <= 50)
+
+        // Command handling
+        if (msg.equals("lorawan"))
         {
-            msg.getBytes(buffer, len + 1);
-            Serial.print("Message to send: ");
-            for (size_t i = 0; i < len; i++)
-                Serial.print((char)buffer[i]);
-            Serial.println();
-
-            // Send via LoRaWAN
-            portENTER_CRITICAL(&mux);
-            bool canSend = hasJoined;
-            portEXIT_CRITICAL(&mux);
-
-            if (canSend)
+            Serial.println("Manual switch to LoRaWAN mode");
+            activateLoRaWAN();
+        }
+        else if (msg.equals("loramesher"))
+        {
+            Serial.println("Manual switch to LoRaMesher mode");
+            activateLoRaMesher();
+        }
+        else if (msg.equals("status"))
+        {
+            Serial.println("\n=== BRIDGE STATUS ===");
+            Serial.printf("LoRaWAN joined: %s\n", hasJoined ? "Yes" : "No");
+            Serial.printf("Current mode: %s\n",
+                          (currentRadioState == RADIO_LORAMESHER) ? "LoRaMesher" : (currentRadioState == RADIO_LORAWAN) ? "LoRaWAN"
+                                                                                                                        : "Switching");
+            Serial.printf("Messages in queue: %d\n", forwardQueue.size());
+            if (loraMesherActive)
             {
-                do_send(buffer, len);
+                Serial.printf("LoRaMesher address: 0x%04X\n", radio.getLocalAddress());
+                Serial.printf("Routing table size: %d\n", radio.routingTableSize());
             }
             else
             {
-                Serial.println("Cannot send: not joined to LoRaWAN network");
+                Serial.println("LoRaMesher not yet active");
+            }
+        }
+        else
+        {
+            // Regular message handling
+            uint8_t buffer[51];
+            size_t len = msg.length();
+            if (len > 0 && len <= 50)
+            {
+                msg.getBytes(buffer, len + 1);
+                Serial.print("Message to send: ");
+                for (size_t i = 0; i < len; i++)
+                    Serial.print((char)buffer[i]);
+                Serial.println();
+
+                // Send via LoRaWAN if joined
+                portENTER_CRITICAL(&mux);
+                bool canSend = hasJoined;
+                portEXIT_CRITICAL(&mux);
+
+                if (canSend)
+                {
+                    // If we're not in LoRaWAN mode, switch modes
+                    if (currentRadioState != RADIO_LORAWAN)
+                    {
+                        activateLoRaWAN();
+                    }
+                    do_send(buffer, len);
+                }
+                else
+                {
+                    Serial.println("Cannot send: not joined to LoRaWAN network");
+                }
             }
         }
     }
 
-    // Periodic broadcast to help discover this bridge node
+    // Periodic broadcast to help discover this bridge node - only in LoRaMesher mode
     static unsigned long lastBroadcast = 0;
-    if (millis() - lastBroadcast > 15000)
+    if (currentRadioState == RADIO_LORAMESHER && millis() - lastBroadcast > 15000)
     { // Every 15 seconds
         Serial.printf("\n=== SENDING PACKET #%d ===\n", dataCounter + 1);
         sendBroadcastMessage();
         lastBroadcast = millis();
+    }
+
+    // Safety check - if LoRaWAN forwarding is taking too long, switch back
+    if (waitingForTxComplete && (millis() - lastForwardTime > 30000))
+    {
+        Serial.println("WARNING: LoRaWAN TX timeout, switching back to LoRaMesher");
+        waitingForTxComplete = false;
+        
+        // If there are remaining messages in the queue
+        if (!forwardQueue.empty()) {
+            Serial.println("Moving messages back to queue for later retry");
+            // Don't switch to LoRaMesher yet as we still have messages to send
+        } else {
+            // No messages to send, safe to switch to LoRaMesher
+            activateLoRaMesher();
+        }
+    }
+
+    // Retry mechanism for failed transmissions - FIX 7
+    static unsigned long lastRetry = 0;
+    if (currentRadioState == RADIO_LORAWAN && !forwardQueue.empty() &&
+        !waitingForTxComplete && millis() - lastRetry > 5000)
+    {
+        Serial.println("Attempting to retry queued message transmission");
+        processForwardQueue();
+        lastRetry = millis();
     }
 
     delay(10); // Small delay for task scheduling
