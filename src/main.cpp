@@ -169,7 +169,7 @@ void createLoRaWANTask()
         "LoRaWAN Task",
         8192,
         (void *)1,
-        3,
+        5,
         NULL);
 }
 
