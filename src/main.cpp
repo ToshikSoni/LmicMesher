@@ -48,7 +48,6 @@ void loraWANTask(void *parameter)
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
-
 LoraMesher &radio = LoraMesher::getInstance();
 uint32_t dataCounter = 0;
 struct dataPacket
@@ -77,8 +76,7 @@ void sendBroadcastMessage()
     helloPacket->messageId = ++dataCounter;
     helloPacket->timestamp = millis();
     helloPacket->sourceAddress = radio.getLocalAddress();
-    snprintf(helloPacket->message, sizeof(helloPacket->message),
-             "Hello #%d", dataCounter);
+    snprintf(helloPacket->message, sizeof(helloPacket->message), "Hello #%d", dataCounter);
     Serial.println("Broadcasting discovery message...");
     Serial.printf("Message: %s\n", helloPacket->message);
     radio.createPacketAndSend(44992, helloPacket, 1);
@@ -89,7 +87,7 @@ void processReceivedPackets(void *)
     for (;;)
     {
         ulTaskNotifyTake(pdPASS, portMAX_DELAY);
-        led_Flash(3, 100); // Quick LED flash to indicate packet arrival
+        led_Flash(3, 100);
         while (radio.getReceivedQueueSize() > 0)
         {
             Serial.println("ReceivedUserData_TaskHandle notify received");
@@ -117,13 +115,11 @@ void createLoRaWANTask()
     int res = xTaskCreate(
         loraWANTask,
         "LoRaWAN Task",
-        8192, // Increased stack size
+        8192,
         (void *)1,
-        3, // Reasonable priority
+        3,
         NULL);
-    // ...
 }
-
 static const u1_t PROGMEM APPEUI[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 void os_getArtEui(u1_t *buf) { memcpy_P(buf, APPEUI, 8); }
 static const u1_t PROGMEM DEVEUI[8] = {0x52, 0x5e, 0x26, 0x00, 0x47, 0x7c, 0x8d, 0xb2};
@@ -187,7 +183,6 @@ void printHex2(unsigned v)
         Serial.print('0');
     Serial.print(v, HEX);
 }
-
 void onEvent(ev_t ev)
 {
     Serial.print(os_getTime());
@@ -309,28 +304,18 @@ void setup()
     pinMode(BOARD_LED, OUTPUT);
     Serial.println(F("Starting"));
     led_Flash(8, 100);
-
     pinMode(Vext, OUTPUT);
     digitalWrite(Vext, LOW);
-
-    // Initialize hardware - explicit radio reset
     pinMode(lmic_pins.rst, OUTPUT);
     digitalWrite(lmic_pins.rst, LOW);
     delay(10);
     digitalWrite(lmic_pins.rst, HIGH);
     delay(10);
-
-    // Disable watchdog timers to prevent crashes
     disableCore0WDT();
     disableCore1WDT();
-
-    // Setup LoRaMesher (commented out for now to test LoRaWAN)
-    // setupLoraMesher();
-
-    // Create LoRaWAN task instead of initializing in setup
+    setupLoraMesher();
     createLoRaWANTask();
-
-    uint16_t myAddress = 0; // You'll need to initialize this differently if not using LoRaMesher
+    uint16_t myAddress = radio.getLocalAddress();
     Serial.println("\n=== DEVICE INFORMATION ===");
     Serial.printf("My Device Address: 0x%04X (%d)\n", myAddress, myAddress);
 
@@ -352,25 +337,15 @@ void loop()
     if (Serial.available())
     {
         String msg = Serial.readStringUntil('\n');
-
-        // Process the message and prepare for transmission
         uint8_t buffer[51];
         size_t len = msg.length();
-
         if (len > 0 && len <= 50)
         {
             msg.getBytes(buffer, len + 1);
-
-            // Print received data
             Serial.print("Message to send: ");
             for (size_t i = 0; i < len; i++)
-            {
                 Serial.print((char)buffer[i]);
-            }
             Serial.println();
-
-            // Queue the message for sending via LoRaWAN
-            // Note: This is not thread-safe, you should use a queue or mutex
             do_send(buffer, len);
         }
     }
@@ -378,6 +353,5 @@ void loop()
     sendBroadcastMessage();
     Serial.println("Waiting 15 seconds for next transmission...\n");
     delay(15000);
-    // Main loop no longer runs os_runloop_once() as it's in the task
-    delay(10); // Give other tasks time to run
+    delay(10);
 }
