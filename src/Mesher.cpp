@@ -6,7 +6,7 @@
 #define LED_OFF LOW
 #define CS 8   // LoRa CS pin
 #define RST 12 // LoRa Reset pin
-#define IRQ 14 // LoRa DIO0/IRQ pin
+#define IRQ 14 // LoRa DIO0/IRQ pin 
 #define IO1 13 // LoRa DIO1 pin
 LoraMesher &radio = LoraMesher::getInstance();
 uint32_t dataCounter = 0;
@@ -40,7 +40,7 @@ void sendBroadcastMessage()
              "Hello #%d", dataCounter);
     Serial.println("Broadcasting discovery message...");
     Serial.printf("Message: %s\n", helloPacket->message);
-    radio.createPacketAndSend(46064, helloPacket, sizeof(dataPacket));
+    radio.createPacketAndSend(51608, helloPacket, sizeof(dataPacket));
     Serial.println("Broadcast sent!");
 }
 void sendPacketsToDiscoveredDevices()
@@ -62,11 +62,11 @@ void sendPacketsToDiscoveredDevices()
             helloPacket->timestamp = millis();
             helloPacket->sourceAddress = radio.getLocalAddress();
             snprintf(helloPacket->message, sizeof(helloPacket->message),
-                     "SF12-DR5 from 0x%04X #%d", radio.getLocalAddress(), dataCounter);
+                     "SF8-DR5 from 0x%04X #%d", radio.getLocalAddress(), dataCounter);
             Serial.printf("Message: %s\n", helloPacket->message);
             Serial.printf("Hops required: %d\n", nodes[i].metric);
             led_Flash(2, 100); // Flash LED to indicate sending
-            radio.createPacketAndSend(46064, helloPacket, 1);
+            radio.createPacketAndSend(51608, helloPacket, 1);
             Serial.println("Packet sent via mesh!");
             delay(2000); // Small delay between sends to respect duty cycle
         }
@@ -88,7 +88,7 @@ void printDataPacket(AppPacket<dataPacket> *packet)
         Serial.printf("Message: %s\n", dPacket[i].message);
         uint32_t transitTime = millis() - dPacket[i].timestamp;
         Serial.printf("Transit time: %d ms\n", transitTime);
-        Serial.printf("Expected SF12 air time: ~1.8 seconds\n");
+        Serial.printf("Expected SF8 air time: ~1.8 seconds\n");
     }
 }
 void processReceivedPackets(void *)
@@ -122,7 +122,7 @@ void createReceiveMessages()
 }
 void setupLoraMesher()
 {
-    Serial.println("Setting up LoRaMesher for India 865MHz SF12 DR5...");
+    Serial.println("Setting up LoRaMesher for India 865MHz SF8 DR5...");
     LoraMesher::LoraMesherConfig config;
     config.module = LoraMesher::LoraModules::SX1262_MOD;
     config.loraCs = CS;
@@ -131,7 +131,7 @@ void setupLoraMesher()
     config.loraIo1 = IO1;
     config.freq = 865.2;       // 865.2 MHz - Indian LoRa frequency
     config.bw = 125.0;         // 125 kHz bandwidth (standard for DR5)
-    config.sf = 8;             // SF12 (Spreading Factor 7 for DR5)
+    config.sf = 8;             // SF8 (Spreading Factor 8 for DR5)
     config.cr = 5;             // Coding Rate 4/5 (denominator 5)
     config.power = 14;         // 14 dBm output power (adjust per Indian regulations)
     config.preambleLength = 8; // 8 preamble symbols
@@ -144,7 +144,7 @@ void setupLoraMesher()
     Serial.printf("Spreading Factor: SF%d\n", config.sf);
     Serial.printf("Coding Rate: 4/%d\n", config.cr);
     Serial.printf("Output Power: %d dBm\n", config.power);
-    Serial.printf("Data Rate: DR5 (SF12BW125)\n");
+    Serial.printf("Data Rate: DR5 (SF8BW125)\n");
     Serial.println("Region: India 865MHz band");
     radio.begin(config);
     createReceiveMessages();

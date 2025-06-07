@@ -15,11 +15,11 @@
 #define IO1 13
 
 // LoRaWAN credentials
-static const u1_t PROGMEM APPEUI[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static const u1_t PROGMEM APPEUI[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // in big endian format
 void os_getArtEui(u1_t *buf) { memcpy_P(buf, APPEUI, 8); }
-static const u1_t PROGMEM DEVEUI[8] = {0x52, 0x5e, 0x26, 0x00, 0x47, 0x7c, 0x8d, 0xb2};
+static const u1_t PROGMEM DEVEUI[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // in little endian format
 void os_getDevEui(u1_t *buf) { memcpy_P(buf, DEVEUI, 8); }
-static const u1_t PROGMEM APPKEY[16] = {0xa5, 0xc4, 0x27, 0x65, 0xd3, 0x8a, 0x31, 0x2a, 0x66, 0xe3, 0x77, 0xfd, 0xf5, 0x48, 0x37, 0x84};
+static const u1_t PROGMEM APPKEY[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // in big endian format
 void os_getDevKey(u1_t *buf) { memcpy_P(buf, APPKEY, 16); }
 
 // Forward declarations for functions used before their definition
@@ -305,7 +305,7 @@ void sendBroadcastMessage()
     snprintf(helloPacket->message, sizeof(helloPacket->message), "Hello #%d", dataCounter);
     Serial.println("Broadcasting discovery message...");
     Serial.printf("Message: %s\n", helloPacket->message);
-    radio.createPacketAndSend(46064, helloPacket, sizeof(dataPacket));
+    radio.createPacketAndSend(51608, helloPacket, sizeof(dataPacket));
     Serial.println("Broadcast sent!");
 }
 
@@ -401,15 +401,14 @@ void createLoRaWANTask()
         Serial.printf("Error: LoRaWAN Task creation gave error: %d\n", res);
 }
 
-
-
 static uint8_t mydata[] = "Hello World";
 static osjob_t sendjob;
 const unsigned TX_INTERVAL = 10;
 
 void setupLoraMesher()
 {
-    Serial.println("Setting up LoRaMesher for India 865MHz SF12 DR5...");
+    Serial.println("Setting up LoRaMesher for India 865MHz SF8 DR5...");
+    Serial.println(radio.getLocalAddress());
     LoraMesher::LoraMesherConfig config;
     config.module = LoraMesher::LoraModules::SX1262_MOD;
     config.loraCs = CS;
@@ -431,7 +430,7 @@ void setupLoraMesher()
     Serial.printf("Spreading Factor: SF%d\n", config.sf);
     Serial.printf("Coding Rate: 4/%d\n", config.cr);
     Serial.printf("Output Power: %d dBm\n", config.power);
-    Serial.printf("Data Rate: DR5 (SF12BW125)\n");
+    Serial.printf("Data Rate: DR5 (SF8BW125)\n");
     Serial.println("Region: India 865MHz band");
 
     // Initialize radio with configuration
@@ -627,7 +626,6 @@ void setup()
     pinMode(BOARD_LED, OUTPUT);
     Serial.println(F("Starting"));
     Serial.println(F("LORAMESHER TO LORAWAN BRIDGE"));
-    Serial.println(F("Current Date/Time: 2025-06-05 09:29:10"));
     led_Flash(8, 100);
 
     pinMode(Vext, OUTPUT);
