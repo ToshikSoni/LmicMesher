@@ -6,7 +6,7 @@
 #define LED_OFF LOW
 #define CS 8   // LoRa CS pin
 #define RST 12 // LoRa Reset pin
-#define IRQ 14 // LoRa DIO0/IRQ pin 
+#define IRQ 14 // LoRa DIO0/IRQ pin
 #define IO1 13 // LoRa DIO1 pin
 LoraMesher &radio = LoraMesher::getInstance();
 uint32_t dataCounter = 0;
@@ -40,7 +40,7 @@ void sendBroadcastMessage()
              "Hello #%d", dataCounter);
     Serial.println("Broadcasting discovery message...");
     Serial.printf("Message: %s\n", helloPacket->message);
-    radio.createPacketAndSend(51608, helloPacket, sizeof(dataPacket));
+    radio.createPacketAndSend(BROADCAST_ADDR, helloPacket, sizeof(dataPacket));
     Serial.println("Broadcast sent!");
 }
 void sendPacketsToDiscoveredDevices()
@@ -66,14 +66,13 @@ void sendPacketsToDiscoveredDevices()
             Serial.printf("Message: %s\n", helloPacket->message);
             Serial.printf("Hops required: %d\n", nodes[i].metric);
             led_Flash(2, 100); // Flash LED to indicate sending
-            radio.createPacketAndSend(51608, helloPacket, 1);
+            radio.createPacketAndSend(BROADCAST_ADDR, helloPacket, 1);
             Serial.println("Packet sent via mesh!");
             delay(2000); // Small delay between sends to respect duty cycle
         }
         delete[] nodes;
     }
 }
-
 void printDataPacket(AppPacket<dataPacket> *packet)
 {
     Serial.printf("=== PACKET RECEIVED ===\n");
